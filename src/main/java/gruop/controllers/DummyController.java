@@ -22,7 +22,7 @@ public class DummyController {
         return null;
     }
 
-    @GetMapping("")
+    @GetMapping("/{id}")
     public ResponseEntity<DummyDto> getDummy(@PathVariable Long id ){
         Dummy dummy= dummyService.getDummy(id);
         return null;
