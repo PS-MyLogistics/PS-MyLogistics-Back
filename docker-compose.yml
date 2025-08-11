@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8081:8081"  # Opcional: solo si querés acceso directo
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  frontend:
+    image: nginx:alpine # uso esta para que ande docker ya que perdi la imaagen de front del ejersicio (es una imagen vacia) # o build si construís localmente
+    ports:
+      - "4200:4200"  # opcional si querés acceso directo
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+    depends_on:
+      - app
+      - frontend
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge

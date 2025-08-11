@@ -15,7 +15,7 @@ public class DummyServiceImpl implements DummyService {
     private DummyRespository dummyRepository;
     @Override
     public Dummy getDummy(Long id) {
-        return null;
+        return new Dummy();
     }
 
     @Override
