@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
         try {
                 String username = jwtService.getUsernameFromToken(token);
                 UUID tenantId = jwtService.getTenantIdFromToken(token);
-                UUID sessionId = jwtService.getSessionIdFromToken(token);
+                UUID sessionId =jwtService.getSessionIdFromToken(token);
 
                 // basic validation token
                 if (username == null || tenantId == null||sessionId == null) {

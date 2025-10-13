@@ -83,4 +83,7 @@ public class RefreshTokenService implements com.mylogisticcba.iam.security.auth.
         refreshTokenRepository.deleteAllByUserIdAndTenantId(userId, tenantId);
     }
 
+    public boolean hasActiveSessionsForUser(UUID userId, UUID tenantId) {
+        return refreshTokenRepository.existsByUserIdAndTenantIdAndRevokedFalse(userId, tenantId);
+    }
 }

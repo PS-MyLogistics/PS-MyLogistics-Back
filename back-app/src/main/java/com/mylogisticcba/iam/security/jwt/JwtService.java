@@ -30,8 +30,8 @@ public class JwtService {
     private String getToken(Map<String,Object> extraClaims, UserDetails user) {
         if (user instanceof CustomUserDetails) {
             extraClaims.put("tenantID", ((CustomUserDetails) user).getTenantId().toString());
-            extraClaims.put("globalTokenVersion",((CustomUserDetails) user).getGlobalTokenVersion().toString());
-            extraClaims.put("sessionId", ((CustomUserDetails) user).getSessionId().toString());
+            extraClaims.put("globalTokenVersion",Objects.toString (((CustomUserDetails) user).getGlobalTokenVersion(),null));
+            extraClaims.put("sessionId", Objects.toString(((CustomUserDetails) user).getSessionId(),null));
         }
         return Jwts
                 .builder()
@@ -53,11 +53,11 @@ public class JwtService {
     }
 
     public UUID getGlobalVersionToken(String token) {
-        String tokenStr = getClaim(token,claims-> claims.get("globalTokenVersion").toString());
+        String tokenStr = getClaim(token,claims-> Objects.toString( claims.get("globalTokenVersion"),null));
         return UUID.fromString(tokenStr);
     }
     public UUID getSessionIdFromToken(String token) {
-        String sessionStr = getClaim(token,claims -> claims.get("sessionId").toString());
+        String sessionStr = getClaim(token,claims -> Objects.toString(claims.get("sessionId"),null));
         return UUID.fromString(sessionStr);
     }
 
@@ -69,7 +69,7 @@ public class JwtService {
     public boolean isTokenValid(String token, CustomUserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         final UUID tenantId   = getTenantIdFromToken(token);
-        final UUID globalVersion = getGlobalVersionToken(username);
+        final UUID globalVersion = getGlobalVersionToken(token);
         final UUID sessionId = getSessionIdFromToken(token);
         if (!StringUtils.hasText(username) || tenantId == null) {
             return false;

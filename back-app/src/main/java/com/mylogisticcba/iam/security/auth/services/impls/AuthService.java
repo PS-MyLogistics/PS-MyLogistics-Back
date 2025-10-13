@@ -128,7 +128,8 @@ public class AuthService implements com.mylogisticcba.iam.security.auth.services
                     new TenantAwareAuthenticationToken(
                             loginRequest.getUsername(),
                             loginRequest.getPassword(),
-                            tenant.getId(), null
+                            tenant.getId(),
+                            null
                     );
 
             // auth
@@ -136,7 +137,7 @@ public class AuthService implements com.mylogisticcba.iam.security.auth.services
 
             // get authenticated user
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-
+            UserEntity user = customUserDetails.getUser();
             // valid status
             switch (tenant.getStatus()) {
                 case SUSPENDED -> throw new AuthServiceException("Suspended tenant");
@@ -150,18 +151,27 @@ public class AuthService implements com.mylogisticcba.iam.security.auth.services
                 case DELETED -> throw new AuthServiceException("User deleted");
                 case FREEZED ->  throw new AuthServiceException("User freezed");
             }
-
-            // generate jwt
-            String jwt = jwtService.getToken(customUserDetails);
+            // Veriffy active sessions and set new global version if not existing
+            boolean hasActiveSessions = refreshTokenService.hasActiveSessionsForUser(user.getId(), tenant.getId());
+            if (!hasActiveSessions && user.getGlobalTokenVersion() == null) {
+                user.setGlobalTokenVersion(UUID.randomUUID());
+                userRepository.save(user);
+            }
 
             // generate refreshToken to session
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(
                     customUserDetails.getUser().getId(), tenant.getId());
 
-            // optional: set TenantContextHolder to use later
+            CustomUserDetails userDetailsWithSession = new CustomUserDetails(user, refreshToken.getToken());
+
+            // generate jwt
+            String jwt = jwtService.getToken(userDetailsWithSession);
+
+
+
             TenantContextHolder.setTenant(tenant.getId());
 
-            // LOGIN EXITOSO - limpiar intentos fallidos
+            //  login is ok clear rate limit attempts
             rateLimitService.clearAttempts(rateLimitKey,LOGIN_ATTEMPTS);
 
             return LoginResponse.builder()
