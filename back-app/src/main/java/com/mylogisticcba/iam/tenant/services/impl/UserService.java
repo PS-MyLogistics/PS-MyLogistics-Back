@@ -7,6 +7,7 @@ import com.mylogisticcba.iam.repositories.VerificarionTokenRepository;
 import com.mylogisticcba.iam.security.auth.dtos.req.RegisterOwnerRequest;
 import com.mylogisticcba.iam.security.auth.entity.VerificationToken;
 import com.mylogisticcba.iam.security.auth.securityCustoms.TenantContextHolder;
+import com.mylogisticcba.iam.tenant.dtos.EditUserInTenantRequest;
 import com.mylogisticcba.iam.tenant.dtos.RegisterUserInTenantRequest;
 import com.mylogisticcba.iam.tenant.dtos.UserDto;
 import com.mylogisticcba.iam.tenant.entity.TenantEntity;
@@ -32,7 +33,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Service
-public class UserService {
+public class UserService implements com.mylogisticcba.iam.tenant.services.UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -117,7 +118,44 @@ public class UserService {
 
         return dto;
     }
+    @Transactional
+    public UserDto editUserDealerInTenant( EditUserInTenantRequest request) {
 
+        UUID tenantId = TenantContextHolder.getTenant();
+
+        // Buscar el usuario existente
+        UserEntity user = userRepository.findByIdAndTenant_Id(request.getUserId(), tenantId)
+                .orElseThrow(() -> new UserServiceException("User not found in tenant"));
+        if(user.isOwner()|| user.getRoles().contains(Role.OWNER)) {
+            throw new UserServiceException("Cannot edit owner user");
+        }
+        if (user.getRoles().contains(Role.ADMIN)) {
+            throw new UserServiceException("Cannot edit owner user");
+        }
+        if (user.getRoles().contains(Role.SUPERADMIN)) {
+            throw new UserServiceException("Cannot edit superAdmin user");
+        }
+
+        // Validar username si cambió
+        if (!user.getUsername().equals(request.getUsername()) &&
+                userRepository.existsByUsernameAndTenant_Id(request.getUsername(), tenantId)) {
+            throw new UserServiceException("Username already exists in tenant");
+        }
+
+        // Actualizar campos
+        user.setUsername(request.getUsername());
+        user.setRoles(request.getRoles());
+        user.setTelephone(request.getTelephone());
+        user.setAddress(request.getAddress());
+        user.setCity(request.getCity());
+        user.setStateOrProvince(request.getStateOrProvince());
+        if(request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        }
+        UserDto dto = modelMapper.map(userRepository.save(user), UserDto.class);
+
+        return dto;
+    }
 
     public List<UserDto> getUsersByTenant() {
         UUID tenantId = TenantContextHolder.getTenant();

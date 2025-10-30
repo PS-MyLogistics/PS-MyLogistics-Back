@@ -38,7 +38,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ResetPasswordService {
+public class ResetPasswordService implements com.mylogisticcba.iam.security.auth.services.ResetPasswordService {
 
     private final ResetPasswordRepository resetPasswordRepository;
     private final JwtService jwtService;
@@ -168,7 +168,7 @@ public class ResetPasswordService {
             validToken.setUsed(true);
             resetPasswordRepository.save(validToken);
 
-            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            userService.changePassword(user, request.getNewPassword());
             userRepository.save(user);
 
             authService.logoutAllSession(user.getId(), user.getTenant().getId());

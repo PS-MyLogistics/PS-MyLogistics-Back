@@ -3,9 +3,9 @@ package com.mylogisticcba.iam.tenant.enums;
 
 public enum Role {
     SUPERADMIN,
-    ADMIN,
     OWNER,
-    USER;
+    ADMIN,
+    DEALER;
 
 
 

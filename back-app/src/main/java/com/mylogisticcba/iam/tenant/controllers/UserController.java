@@ -3,6 +3,7 @@ package com.mylogisticcba.iam.tenant.controllers;
 
 import com.mylogisticcba.iam.security.auth.dtos.response.AuthResponse;
 import com.mylogisticcba.iam.security.auth.services.AuthService;
+import com.mylogisticcba.iam.tenant.dtos.EditUserInTenantRequest;
 import com.mylogisticcba.iam.tenant.dtos.RegisterUserInTenantRequest;
 import com.mylogisticcba.iam.tenant.dtos.UserDto;
 import com.mylogisticcba.iam.tenant.services.impl.UserService;
@@ -39,6 +40,14 @@ public class UserController {
     public ResponseEntity<UserDto> createUserInTenant(@RequestBody RegisterUserInTenantRequest req) {
         return ResponseEntity.ok(service.createUserInTenant(req));
     }
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PutMapping("/editInternalUser" )
+    public ResponseEntity<UserDto> editUserDealerInTenant(@RequestBody EditUserInTenantRequest req) {
+
+        return ResponseEntity.ok(service.editUserDealerInTenant(req));
+    }
+
+
     @PostMapping("/logout")
     public ResponseEntity<AuthResponse> logout(@CookieValue(name = "refreshToken") String refreshTokenCookie) {
         AuthResponse response = authService.logoutSession(refreshTokenCookie);
