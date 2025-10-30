@@ -69,6 +69,7 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
         order.setTenantId(customer.getTenantId());
         order.setOrderNumber("ORD-" + UUID.randomUUID().toString());
         order.setOrderDate(LocalDateTime.now());
+
         order.setNotes(orderCreationRequest.getNotes());
 
         List<OrderItem> items = new ArrayList<>();
@@ -144,6 +145,7 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
                 .state(cReq.getState())
                 .country(cReq.getCountry())
                 .notes(cReq.getNotes())
+                .doorbell(cReq.getDoorbell())
                 .build();
 
         try {

@@ -57,6 +57,8 @@ public class Customer {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    private String doorbell;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private CustomerType type = CustomerType.REGULAR;

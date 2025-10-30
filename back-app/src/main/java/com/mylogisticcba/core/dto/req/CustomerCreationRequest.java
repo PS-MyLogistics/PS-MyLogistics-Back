@@ -41,6 +41,9 @@ public class CustomerCreationRequest {
     @NotEmpty(message = "El pais no puede estar vacío")
     private String country;
 
+    @NotEmpty(message = "El timbre no puede estar vacío ingrese 0 si no posee")
+    private String doorbell;
+
     private String notes;
     private String type; // REGULAR, VIP, WHOLESALE
     private Boolean isActive;
