@@ -14,7 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CustomerCreationRequest {
 
-    private UUID tenantId; // opcional, pero necesario si la entidad lo requiere
 
     @NotEmpty(message = "El nombre del cliente no puede estar vacío")
     private String name;

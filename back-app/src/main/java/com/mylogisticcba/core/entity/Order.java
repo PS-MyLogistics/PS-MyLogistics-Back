@@ -2,10 +2,7 @@ package com.mylogisticcba.core.entity;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,6 +16,9 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"customer", "orderItems"})  // ← CRÍTICO
+@EqualsAndHashCode(exclude = {"customer", "orderItems"})
+@Table(name = "orders")  // 'order' es palabra reservada en SQL
 public class Order {
 
     @Id
@@ -39,7 +39,7 @@ public class Order {
     private List<OrderItem> orderItems ;
 
     @Column(name = "order_date", nullable = false)
-    private LocalDateTime orderDate;
+    private LocalDateTime orderProgramDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -78,11 +78,5 @@ public class Order {
         item.setOrder(null);
     }
 
-    public void calculateTotalAmount() {
-        BigDecimal total = BigDecimal.ZERO;
-        for (OrderItem item : orderItems) {
-            total = total.add(item.getSubtotal());
-        }
-        this.totalAmount = total;
-    }
+
 }

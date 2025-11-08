@@ -21,10 +21,10 @@ public class OrderController {
 
 
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
-    @GetMapping("/getAll")
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<OrderCreatedResponse> createOrder(@Valid @RequestBody OrderCreationRequest request) {
         OrderCreatedResponse order = orderService.createOrder(request);
         return ResponseEntity.ok(order);
     }
+
 }
