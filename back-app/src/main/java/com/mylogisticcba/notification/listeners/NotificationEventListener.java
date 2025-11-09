@@ -31,6 +31,8 @@ public class NotificationEventListener {
         Context context = new Context();
         context.setVariable("nombre", event.getOwnerUsername());
         context.setVariable("verificationUrl", verificationUrl);
+
+        // Enviar email al tenant
         emailNotificationService.sendEmail(
                 event.getTenantEmail(),
                 "Verifica tu cuenta para dar de alta a tu espacio de trabajo",
@@ -38,13 +40,17 @@ public class NotificationEventListener {
                 context,
                 event.getTenantId().toString()
         );
-        emailNotificationService.sendEmail(
-                event.getOwnerEmail(),
-                "Verifica tu cuenta para dar de alta a tu espacio de trabajo",
-                "register-verification-email-template",
-                context,
-                event.getTenantId().toString()
-        );
+
+        // Solo enviar email al owner si es diferente al tenant
+        if (!event.getTenantEmail().equals(event.getOwnerEmail())) {
+            emailNotificationService.sendEmail(
+                    event.getOwnerEmail(),
+                    "Verifica tu cuenta para dar de alta a tu espacio de trabajo",
+                    "register-verification-email-template",
+                    context,
+                    event.getTenantId().toString()
+            );
+        }
 
     }
 
