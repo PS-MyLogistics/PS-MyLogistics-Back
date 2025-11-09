@@ -4,6 +4,8 @@ import com.mylogisticcba.core.dto.req.CustomerCreationRequest;
 import com.mylogisticcba.core.dto.req.OrderCreationRequest;
 import com.mylogisticcba.core.dto.req.OrderItemRequest;
 import com.mylogisticcba.core.dto.response.OrderCreatedResponse;
+import com.mylogisticcba.core.dto.response.OrderItemResponse;
+import com.mylogisticcba.core.dto.response.OrderResponse;
 import com.mylogisticcba.core.entity.Customer;
 import com.mylogisticcba.core.entity.Order;
 import com.mylogisticcba.core.entity.OrderItem;
@@ -16,6 +18,7 @@ import com.mylogisticcba.core.service.rest.LatLng;
 import com.mylogisticcba.core.service.rest.NominatimGeoService;
 import com.mylogisticcba.core.service.rest.StructuredAddress;
 import com.mylogisticcba.iam.security.auth.securityCustoms.TenantContextHolder;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -237,5 +241,57 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
         }
 
         return customerRepository.save(newCustomer);
+    }
+
+    @Override
+    public List<OrderResponse> getAllOrders() {
+        UUID tenantId = TenantContextHolder.getTenant();
+        return orderRepository.findAll().stream()
+                .filter(order -> order.getTenantId().equals(tenantId))
+                .map(this::toOrderResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderResponse getOrderById(UUID id) {
+        UUID tenantId = TenantContextHolder.getTenant();
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + id));
+
+        if (!order.getTenantId().equals(tenantId)) {
+            throw new EntityNotFoundException("Order not found in this tenant");
+        }
+
+        return toOrderResponse(order);
+    }
+
+    private OrderResponse toOrderResponse(Order order) {
+        Customer customer = order.getCustomer();
+
+        List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
+                .map(item -> OrderItemResponse.builder()
+                        .productId(item.getProduct().getId())
+                        .productName(item.getProduct().getName())
+                        .quantity(item.getQuantity())
+                        .unitPrice(item.getUnitPrice())
+                        .subtotal(item.getSubtotal())
+                        .build())
+                .collect(Collectors.toList());
+
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .tenantId(order.getTenantId())
+                .customerId(customer.getId())
+                .customerName(customer.getName())
+                .customerAddress(customer.getAddress())
+                .customerCity(customer.getCity())
+                .items(itemResponses)
+                .totalAmount(order.getTotalAmount())
+                .status(order.getStatus().name())
+                .notes(order.getNotes())
+                .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
+                .build();
     }
 }
