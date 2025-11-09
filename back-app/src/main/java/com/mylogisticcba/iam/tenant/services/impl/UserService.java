@@ -198,6 +198,13 @@ public class UserService implements com.mylogisticcba.iam.tenant.services.UserSe
         return user;
     }
 
+    public UserDto getUserByUsername(String username) {
+        UUID tenantId = TenantContextHolder.getTenant();
+        UserEntity user = userRepository.findByUsernameAndTenant_Id(username, tenantId)
+                .orElseThrow(() -> new UserServiceException("User not found in this space"));
+        return modelMapper.map(user, UserDto.class);
+    }
+
     private UserEntity saveUserInTenant(UserEntity user) {
         if(userRepository.existsByUsernameAndTenant_Id(user.getUsername(), user.getTenant().getId())) {
             throw new RuntimeException("Username already exists in this tenant");
