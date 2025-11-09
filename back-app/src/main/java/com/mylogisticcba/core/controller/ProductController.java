@@ -9,10 +9,10 @@ import com.mylogisticcba.core.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 @RestController
 @RequestMapping("/products/")
 public class ProductController {
@@ -24,10 +24,38 @@ public class ProductController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @GetMapping("/getAll")
+    public ResponseEntity<List<ProductResponse>> getAllProducts() {
+        List<ProductResponse> products = productService.getAllProductsAsDto();
+        return ResponseEntity.ok(products);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable String id) {
+        ProductResponse product = productService.getProductById(UUID.fromString(id));
+        return ResponseEntity.ok(product);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
     @PostMapping("create")
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreationRequest request) {
         ProductResponse order = productService.createProduct(request);
         return ResponseEntity.ok(order);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable String id, @Valid @RequestBody ProductCreationRequest request) {
+        ProductResponse updated = productService.updateProduct(UUID.fromString(id), request);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
+        productService.deleteProduct(UUID.fromString(id));
+        return ResponseEntity.noContent().build();
     }
 
 }
