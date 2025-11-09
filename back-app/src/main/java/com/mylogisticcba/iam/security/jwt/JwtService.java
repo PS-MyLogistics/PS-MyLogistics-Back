@@ -32,6 +32,8 @@ public class JwtService {
             extraClaims.put("tenantID", ((CustomUserDetails) user).getTenantId().toString());
             extraClaims.put("globalTokenVersion",Objects.toString (((CustomUserDetails) user).getGlobalTokenVersion(),null));
             extraClaims.put("sessionId", Objects.toString(((CustomUserDetails) user).getSessionId(),null));
+
+
         }
         return Jwts
                 .builder()
@@ -65,22 +67,66 @@ public class JwtService {
         String tenantIdStr = getClaim(token, claims -> claims.get("tenantID", String.class));
         return UUID.fromString(tenantIdStr);
     }
-
+/*
     public boolean isTokenValid(String token, CustomUserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         final UUID tenantId   = getTenantIdFromToken(token);
-        final UUID globalVersion = getGlobalVersionToken(token);
         final UUID sessionId = getSessionIdFromToken(token);
+         UUID globalVersion = null;
+        //validacion de uuid seteado para el jwt de reseteo de contraseña (no tendra global) todos los otros casos si
+        if(!sessionId.equals(UUID.fromString("1e522963-af4c-43e6-85aa-5dab290be13c"))) {
+            globalVersion = getGlobalVersionToken(token);
+        }
+
         if (!StringUtils.hasText(username) || tenantId == null) {
             return false;
         }
 
         return username.equals(userDetails.getUsername()) &&
                 tenantId.equals(userDetails.getTenantId()) &&
-                globalVersion.equals(userDetails.getGlobalTokenVersion())&&
+                //validacion si el token de de reseteo de contraseña
+                (globalVersion.equals(userDetails.getGlobalTokenVersion())||sessionId.equals(UUID.fromString("1e522963-af4c-43e6-85aa-5dab290be13c")))&&
                 Objects.equals(sessionId, userDetails.getSessionId())&&
                 !isTokenExpired(token);
     }
+*/
+    public boolean isTokenValid(String token, CustomUserDetails userDetails) {
+        final String username = getUsernameFromToken(token);
+        final UUID tenantId   = getTenantIdFromToken(token);
+        final UUID sessionId  = getSessionIdFromToken(token);
+        UUID globalVersion    = null;
+
+        final UUID RESET_PASSWORD_SESSION_UUID = UUID.fromString("1e522963-af4c-43e6-85aa-5dab290be13c");
+
+        // Si no es el token de reseteo, obtengo la versión global
+        if (!Objects.equals(sessionId, RESET_PASSWORD_SESSION_UUID)) {
+            globalVersion = getGlobalVersionToken(token);
+        }
+
+        if (!StringUtils.hasText(username) || tenantId == null) {
+            return false;
+        }
+
+        return Objects.equals(username, userDetails.getUsername())
+                && Objects.equals(tenantId, userDetails.getTenantId())
+                && (
+                        // Si tiene globalVersion, debe coincidir
+                        Objects.equals(globalVersion, userDetails.getGlobalTokenVersion())
+                        // O si es el token especial de reset, también es válido
+                        || Objects.equals(sessionId, RESET_PASSWORD_SESSION_UUID)
+                    )
+                && (
+                        Objects.equals(sessionId, userDetails.getSessionId())
+                        || Objects.equals(sessionId, RESET_PASSWORD_SESSION_UUID))
+                && !isTokenExpired(token);
+    }
+
+
+
+
+
+
+
 
     private Claims getAllClaims(String token)
     {

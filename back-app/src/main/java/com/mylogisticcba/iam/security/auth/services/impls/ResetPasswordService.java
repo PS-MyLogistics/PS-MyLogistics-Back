@@ -91,7 +91,7 @@ public class ResetPasswordService implements com.mylogisticcba.iam.security.auth
             }
 
             // Generate jwt and pesist his hash in entity tokenResetPassword
-            String jwtResetToken = jwtService.getToken(new CustomUserDetails(user, null));
+            String jwtResetToken = jwtService.getToken(new CustomUserDetails(user, UUID.fromString("1e522963-af4c-43e6-85aa-5dab290be13c")));
             String jtwTokenHashed = passwordEncoder.encode(jwtResetToken);
             ResetPasswordToken resetPassTokenEntity = ResetPasswordToken.builder().id(UUID.randomUUID())
                     .tokenHash(jtwTokenHashed)
