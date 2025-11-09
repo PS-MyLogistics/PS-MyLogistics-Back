@@ -25,10 +25,14 @@ public class NotificationEntity {
     private String subject;                   // opc, x mails
     private String templateName ;             // opc, x mails
     private LocalDateTime createdAt;
+
+    @Column(length = 2000)
     private String variables;
 
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
+
+    @Column(length = 1000)
     private String errorMessage;                 // if  failed status
 
     private int retryCount = 0;                 // number of retry attempts
