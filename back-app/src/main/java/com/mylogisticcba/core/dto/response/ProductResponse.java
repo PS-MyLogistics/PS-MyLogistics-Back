@@ -11,6 +11,7 @@ import java.util.UUID;
 public class ProductResponse {
     private UUID id;
     private String name;
+    private String sku;
     private String description;
     private BigDecimal price;
 }
