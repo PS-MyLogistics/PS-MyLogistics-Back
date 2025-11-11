@@ -184,9 +184,10 @@ public class UserService implements com.mylogisticcba.iam.tenant.services.UserSe
         return dto;
     }
 
+    @Transactional
     public List<UserDto> getUsersByTenant() {
         UUID tenantId = TenantContextHolder.getTenant();
-        List<UserEntity>users = userRepository.findByTenant_Id(tenantId).orElseThrow(()
+        List<UserEntity>users = userRepository.findWithVehiclesByTenant_Id(tenantId).orElseThrow(()
                 -> new EntityNotFoundException("users not found"));
 
         List<UserDto> userDtos = new ArrayList<>();

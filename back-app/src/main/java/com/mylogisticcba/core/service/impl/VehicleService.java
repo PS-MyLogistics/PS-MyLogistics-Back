@@ -4,7 +4,9 @@ import com.mylogisticcba.core.dto.req.VehicleRequest;
 import com.mylogisticcba.core.dto.response.VehicleResponse;
 import com.mylogisticcba.core.entity.Vehicle;
 import com.mylogisticcba.core.repository.distribution.VehicleRepository;
+import com.mylogisticcba.iam.repositories.UserRepository;
 import com.mylogisticcba.iam.security.auth.securityCustoms.TenantContextHolder;
+import com.mylogisticcba.iam.tenant.entity.UserEntity;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,9 +20,11 @@ import java.util.stream.Collectors;
 public class VehicleService implements com.mylogisticcba.core.service.VehicleService {
 
     private final VehicleRepository vehicleRepository;
+    private final UserRepository userRepository;
 
-    public VehicleService(VehicleRepository vehicleRepository) {
+    public VehicleService(VehicleRepository vehicleRepository, UserRepository userRepository) {
         this.vehicleRepository = vehicleRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -123,6 +127,14 @@ public class VehicleService implements com.mylogisticcba.core.service.VehicleSer
             throw new EntityNotFoundException("Vehicle not found in this tenant");
         }
 
+        // Desasignar el vehículo de todos los usuarios que lo tienen asignado
+        List<UserEntity> usersWithVehicle = userRepository.findByVehicle_Id(id);
+        for (UserEntity user : usersWithVehicle) {
+            user.setVehicle(null);
+        }
+        userRepository.saveAll(usersWithVehicle);
+
+        // Ahora sí borrar el vehículo
         vehicleRepository.delete(vehicle);
     }
 
