@@ -20,4 +20,6 @@ public class RegisterUserInTenantRequest extends RegisterRequest {
     String city;
     String stateOrProvince;
 
+    java.util.UUID vehicleId;
+
 }

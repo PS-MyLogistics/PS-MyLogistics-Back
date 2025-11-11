@@ -20,4 +20,6 @@ public interface DistributionService {
     List<DistributionResponse> getAll();
 
     DistributionResponse getDistributionByIdDealer(UUID id);
+
+    List<DistributionResponse> getDistributionsForDealer();
 }

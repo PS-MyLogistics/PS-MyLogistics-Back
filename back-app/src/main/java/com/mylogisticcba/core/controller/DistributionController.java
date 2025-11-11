@@ -66,6 +66,13 @@ public class DistributionController {
         return ResponseEntity.ok(resp);
     }
 
+    @PreAuthorize("hasAnyRole('DEALER')")
+    @GetMapping("/dealer/myDistributions")
+    public ResponseEntity<List<DistributionResponse>> getMyDistributions() {
+        List<DistributionResponse> resp = distributionService.getDistributionsForDealer();
+        return ResponseEntity.ok(resp);
+    }
+
 
 
 

@@ -30,7 +30,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER', 'DEALER')")
     @GetMapping("/getAll")
     public ResponseEntity<List<UserDto>> getUsers() {
         return ResponseEntity.ok(service.getUsersByTenant());

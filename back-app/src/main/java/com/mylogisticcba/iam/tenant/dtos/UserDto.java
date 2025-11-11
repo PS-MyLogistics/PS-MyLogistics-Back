@@ -18,6 +18,8 @@ public class UserDto {
     List<Role> roles;
     boolean  owner;
     UserStatus status;
+    private String vehicleId;
+    private String vehiclePlate;
 
 
 }
