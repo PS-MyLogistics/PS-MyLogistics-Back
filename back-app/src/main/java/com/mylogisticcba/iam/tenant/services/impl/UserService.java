@@ -240,6 +240,33 @@ public class UserService implements com.mylogisticcba.iam.tenant.services.UserSe
         return userRepository.save(user);
     }
 
+    @Transactional
+    public void deleteUser(UUID userId) {
+        UUID tenantId = TenantContextHolder.getTenant();
+
+        // Buscar el usuario existente
+        UserEntity user = userRepository.findByIdAndTenant_Id(userId, tenantId)
+                .orElseThrow(() -> new UserServiceException("User not found in tenant"));
+
+        // Validar que no sea un owner
+        if(user.isOwner() || user.getRoles().contains(Role.OWNER)) {
+            throw new UserServiceException("Cannot delete owner user");
+        }
+
+        // Validar que no sea un admin
+        if (user.getRoles().contains(Role.ADMIN)) {
+            throw new UserServiceException("Cannot delete admin user");
+        }
+
+        // Validar que no sea un superadmin
+        if (user.getRoles().contains(Role.SUPERADMIN)) {
+            throw new UserServiceException("Cannot delete superAdmin user");
+        }
+
+        // Eliminar el usuario
+        userRepository.delete(user);
+    }
+
     /**
      * Convierte UserEntity a UserDto incluyendo información del vehículo
      */

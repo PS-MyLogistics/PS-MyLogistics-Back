@@ -20,4 +20,5 @@ public interface UserService  {
     UserEntity getUserByUsernameAndEmailAndTenantId(String user , String email, UUID tenanId);
     UserEntity getUserByEmailAndTenantId(String email, UUID tenantId);
     UserDto editUserDealerInTenant(EditUserInTenantRequest req);
+    void deleteUser(UUID userId);
 }
