@@ -3,7 +3,9 @@ package com.mylogisticcba.core.service.impl;
 import com.mylogisticcba.core.dto.req.CustomerCreationRequest;
 import com.mylogisticcba.core.dto.response.CustomerResponse;
 import com.mylogisticcba.core.entity.Customer;
+import com.mylogisticcba.core.entity.Zone;
 import com.mylogisticcba.core.repository.orders.CustomerRepository;
+import com.mylogisticcba.core.repository.orders.ZoneRepository;
 import com.mylogisticcba.core.service.CustomerService;
 import com.mylogisticcba.core.service.rest.LatLng;
 import com.mylogisticcba.core.service.rest.NominatimGeoService;
@@ -25,10 +27,12 @@ public class CustomerServiceImpl implements CustomerService {
     private static final Logger log = LoggerFactory.getLogger(CustomerServiceImpl.class);
 
     private final CustomerRepository customerRepository;
+    private final ZoneRepository zoneRepository;
     private final NominatimGeoService geoService;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, NominatimGeoService geoService) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, ZoneRepository zoneRepository, NominatimGeoService geoService) {
         this.customerRepository = customerRepository;
+        this.zoneRepository = zoneRepository;
         this.geoService = geoService;
     }
 
@@ -62,6 +66,13 @@ public class CustomerServiceImpl implements CustomerService {
         // Geocodificar la dirección
         LatLng coordinates = geocodeAddress(request);
 
+        // Asignar zona si se proporciona
+        Zone zone = null;
+        if (request.getZoneId() != null && !request.getZoneId().isBlank()) {
+            zone = zoneRepository.findByIdAndTenantId(UUID.fromString(request.getZoneId()), tenantId)
+                    .orElseThrow(() -> new EntityNotFoundException("Zone not found with id: " + request.getZoneId()));
+        }
+
         Customer customer = Customer.builder()
                 .tenantId(tenantId)
                 .name(request.getName())
@@ -77,6 +88,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .doorbell(request.getDoorbell())
                 .notes(request.getNotes())
                 .type(parseCustomerType(request.getType()))
+                .zone(zone)
                 .build();
 
         Customer saved = customerRepository.save(customer);
@@ -105,6 +117,15 @@ public class CustomerServiceImpl implements CustomerService {
             LatLng coordinates = geocodeAddress(request);
             customer.setLatitude(coordinates.getLat());
             customer.setLongitude(coordinates.getLon());
+        }
+
+        // Actualizar zona si se proporciona
+        if (request.getZoneId() != null && !request.getZoneId().isBlank()) {
+            Zone zone = zoneRepository.findByIdAndTenantId(UUID.fromString(request.getZoneId()), tenantId)
+                    .orElseThrow(() -> new EntityNotFoundException("Zone not found with id: " + request.getZoneId()));
+            customer.setZone(zone);
+        } else {
+            customer.setZone(null); // Remover zona si no se proporciona
         }
 
         customer.setName(request.getName());
@@ -168,7 +189,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private CustomerResponse toResponse(Customer customer) {
-        return CustomerResponse.builder()
+        CustomerResponse.CustomerResponseBuilder builder = CustomerResponse.builder()
                 .id(customer.getId())
                 .tenantId(customer.getTenantId())
                 .name(customer.getName())
@@ -183,7 +204,14 @@ public class CustomerServiceImpl implements CustomerService {
                 .notes(customer.getNotes())
                 .type(customer.getType().name())
                 .isActive(true) // El modelo actual no tiene isActive, siempre true
-                .createdAt(customer.getCreatedAt())
-                .build();
+                .createdAt(customer.getCreatedAt());
+
+        // Agregar información de la zona si existe
+        if (customer.getZone() != null) {
+            builder.zoneId(customer.getZone().getId())
+                   .zoneName(customer.getZone().getName());
+        }
+
+        return builder.build();
     }
 }

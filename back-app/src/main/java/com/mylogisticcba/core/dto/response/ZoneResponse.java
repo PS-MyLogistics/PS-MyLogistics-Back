@@ -12,22 +12,13 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerResponse {
+public class ZoneResponse {
     private UUID id;
     private UUID tenantId;
     private String name;
-    private String email;
-    private String phoneNumber;
-    private String address;
-    private String postalCode;
-    private String city;
-    private String state;
-    private String country;
-    private String doorbell;
-    private String notes;
-    private String type;
+    private String description;
+    private String color;
     private Boolean isActive;
-    private UUID zoneId;
-    private String zoneName;
     private Instant createdAt;
+    private Instant updatedAt;
 }
