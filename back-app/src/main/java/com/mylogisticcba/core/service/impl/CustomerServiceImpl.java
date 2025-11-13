@@ -204,7 +204,10 @@ public class CustomerServiceImpl implements CustomerService {
                 .notes(customer.getNotes())
                 .type(customer.getType().name())
                 .isActive(true) // El modelo actual no tiene isActive, siempre true
+                .latitude(customer.getLatitude())
+                .longitude(customer.getLongitude())
                 .createdAt(customer.getCreatedAt());
+
 
         // Agregar información de la zona si existe
         if (customer.getZone() != null) {

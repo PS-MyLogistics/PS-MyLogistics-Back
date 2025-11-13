@@ -29,5 +29,7 @@ public class CustomerResponse {
     private Boolean isActive;
     private UUID zoneId;
     private String zoneName;
+    private Double latitude;
+    private Double longitude;
     private Instant createdAt;
 }
