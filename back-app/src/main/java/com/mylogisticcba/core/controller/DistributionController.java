@@ -1,6 +1,7 @@
 package com.mylogisticcba.core.controller;
 
 import com.mylogisticcba.core.dto.req.DistributionCreationRequest;
+import com.mylogisticcba.core.dto.req.DistributionStatusUpdateRequest;
 import com.mylogisticcba.core.dto.response.DistributionResponse;
 import com.mylogisticcba.core.entity.Distribution;
 import com.mylogisticcba.core.service.DistributionService;
@@ -73,7 +74,13 @@ public class DistributionController {
         return ResponseEntity.ok(resp);
     }
 
-
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER', 'DEALER')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<DistributionResponse> updateDistributionStatus(
+            @PathVariable("id") UUID id,
+            @RequestBody DistributionStatusUpdateRequest request) {
+        DistributionResponse resp = distributionService.updateDistributionStatus(id, request);
+        return ResponseEntity.ok(resp);
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.mylogisticcba.core.service;
 
 import com.mylogisticcba.core.dto.req.DistributionCreationRequest;
+import com.mylogisticcba.core.dto.req.DistributionStatusUpdateRequest;
 import com.mylogisticcba.core.dto.response.DistributionResponse;
 import com.mylogisticcba.core.entity.Distribution;
 
@@ -22,4 +23,7 @@ public interface DistributionService {
     DistributionResponse getDistributionByIdDealer(UUID id);
 
     List<DistributionResponse> getDistributionsForDealer();
+
+    // Actualiza el estado de una distribución
+    DistributionResponse updateDistributionStatus(UUID id, DistributionStatusUpdateRequest request);
 }

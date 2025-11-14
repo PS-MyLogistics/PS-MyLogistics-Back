@@ -1,6 +1,7 @@
 package com.mylogisticcba.core.service.impl;
 
 import com.mylogisticcba.core.dto.req.DistributionCreationRequest;
+import com.mylogisticcba.core.dto.req.DistributionStatusUpdateRequest;
 import com.mylogisticcba.core.dto.response.DistributionResponse;
 import com.mylogisticcba.core.entity.Distribution;
 import com.mylogisticcba.core.entity.Order;
@@ -397,5 +398,68 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
                     .notes(d.getNotes())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public DistributionResponse updateDistributionStatus(UUID id, DistributionStatusUpdateRequest request) {
+        if (id == null) {
+            throw new OrderServiceException("distributionId required", HttpStatus.BAD_REQUEST);
+        }
+
+        Distribution dist = distributionRepository.findById(id)
+                .orElseThrow(() -> new OrderServiceException("Distribution not found: " + id, HttpStatus.NOT_FOUND));
+
+        UUID tenantFromContext = TenantContextHolder.getTenant();
+        if (tenantFromContext == null || !tenantFromContext.equals(dist.getTenantId())) {
+            throw new OrderServiceException("Invalid tenant context for distribution", HttpStatus.FORBIDDEN);
+        }
+
+        // Actualizar el status si viene en el request
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            try {
+                Distribution.DistributionStatus newStatus = Distribution.DistributionStatus.valueOf(request.getStatus().toUpperCase());
+                dist.setStatus(newStatus);
+            } catch (IllegalArgumentException e) {
+                throw new OrderServiceException(
+                        "Invalid status: " + request.getStatus(),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+        }
+
+        // Guardar cambios
+        Distribution updated = distributionRepository.save(dist);
+
+        // Construir respuesta
+        List<UUID> orderIdsAux = updated.getOrders() == null
+                ? new ArrayList<>()
+                : updated.getOrders().stream().map(Order::getId).collect(Collectors.toList());
+
+        List<UUID> ordersOptimizedAux = updated.getOrdersOptimized() == null
+                ? new ArrayList<>()
+                : updated.getOrdersOptimized().stream().map(Order::getId).collect(Collectors.toList());
+
+        Map<Integer, UUID> optimizationRoute = null;
+        if (updated.isOptimized()) {
+            optimizationRoute = new LinkedHashMap<>();
+            for (int i = 0; i < ordersOptimizedAux.size(); i++) {
+                optimizationRoute.put(i + 1, ordersOptimizedAux.get(i));
+            }
+        }
+
+        return DistributionResponse.builder()
+                .id(updated.getId())
+                .tenantId(updated.getTenantId())
+                .orderIds(orderIdsAux)
+                .optimizatedRoute(optimizationRoute)
+                .dealerId(updated.getDealer() == null ? null : updated.getDealer().getId())
+                .vehicleId(updated.getVehicle() == null ? null : updated.getVehicle().getId())
+                .startProgramDateTime(updated.getStartProgramDateTime())
+                .endProgramDateTime(updated.getEndProgramDateTime())
+                .createdAt(updated.getCreatedAt())
+                .status(updated.getStatus() == null ? null : updated.getStatus().name())
+                .notes(updated.getNotes())
+                .build();
     }
 }
