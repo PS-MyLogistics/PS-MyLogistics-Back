@@ -3,6 +3,7 @@ package com.mylogisticcba.core.service.impl;
 import com.mylogisticcba.core.dto.req.CustomerCreationRequest;
 import com.mylogisticcba.core.dto.req.OrderCreationRequest;
 import com.mylogisticcba.core.dto.req.OrderItemRequest;
+import com.mylogisticcba.core.dto.req.OrderUpdateRequest;
 import com.mylogisticcba.core.dto.response.OrderCreatedResponse;
 import com.mylogisticcba.core.dto.response.OrderItemResponse;
 import com.mylogisticcba.core.dto.response.OrderResponse;
@@ -263,6 +264,50 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
         }
 
         return toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse updateOrder(UUID id, OrderUpdateRequest request) {
+        UUID tenantId = TenantContextHolder.getTenant();
+
+        // Buscar la orden
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderServiceException(
+                        "Order not found with id: " + id,
+                        HttpStatus.NOT_FOUND
+                ));
+
+        // Verificar que pertenezca al tenant
+        if (!order.getTenantId().equals(tenantId)) {
+            throw new OrderServiceException(
+                    "Order not found in this tenant",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        // Actualizar el status si viene en el request
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            try {
+                Order.OrderStatus newStatus = Order.OrderStatus.valueOf(request.getStatus().toUpperCase());
+                order.setStatus(newStatus);
+            } catch (IllegalArgumentException e) {
+                throw new OrderServiceException(
+                        "Invalid status: " + request.getStatus(),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+        }
+
+        // Actualizar notas si vienen en el request
+        if (request.getNotes() != null) {
+            order.setNotes(request.getNotes());
+        }
+
+        // Guardar cambios
+        Order updated = orderRepository.save(order);
+
+        return toOrderResponse(updated);
     }
 
     private OrderResponse toOrderResponse(Order order) {

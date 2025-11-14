@@ -108,6 +108,12 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
 
         Distribution saved = distributionRepository.save(dist);
 
+        // Actualizar estado de los pedidos a CONFIRMED
+        orders.forEach(order -> {
+            order.setStatus(Order.OrderStatus.CONFIRMED);
+            orderRepository.save(order);
+        });
+
         List<UUID> orderIdsAux = new ArrayList<>();
         for (Order o : saved.getOrders()) {
             orderIdsAux.add(o.getId());
