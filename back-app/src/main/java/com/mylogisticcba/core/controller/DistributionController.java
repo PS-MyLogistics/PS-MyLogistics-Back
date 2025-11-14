@@ -61,12 +61,8 @@ public class DistributionController {
     @PreAuthorize("hasAnyRole('DEALER')")
     @GetMapping("/dealer/route/{id}")
     public ResponseEntity<DistributionResponse> getDistributionxIdForDealer(@PathVariable UUID id) {
-
         DistributionResponse resp = distributionService.getDistributionByIdDealer(id);
         return ResponseEntity.ok(resp);
     }
-
-
-
 
 }
