@@ -47,6 +47,7 @@ public class DistributionController {
                 .createdAt(dist.getCreatedAt())
                 .status(dist.getStatus() == null ? null : dist.getStatus().name())
                 .notes(dist.getNotes())
+                .isOptimized(dist.isOptimized())
                 .build();
 
         return ResponseEntity.ok(resp);

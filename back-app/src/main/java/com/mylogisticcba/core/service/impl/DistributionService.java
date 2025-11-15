@@ -131,6 +131,7 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
                 .createdAt(saved.getCreatedAt())
                 .status(saved.getStatus() == null ? null : saved.getStatus().name())
                 .notes(saved.getNotes())
+                .isOptimized(saved.isOptimized())
                 .build();
 
         return resp;
@@ -178,7 +179,7 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
 
         // Marcar como optimizado y cambiar estado a IN_PROGRESS
         dist.setOptimized(true);
-        dist.setStatus(Distribution.DistributionStatus.IN_PROGRESS);
+        //dist.setStatus(Distribution.DistributionStatus.IN_PROGRESS);
 
         return distributionRepository.save(dist);
     }
@@ -246,6 +247,7 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
                     .createdAt(d.getCreatedAt())
                     .status(d.getStatus() == null ? null : d.getStatus().name())
                     .notes(d.getNotes())
+                    .isOptimized(d.isOptimized())
                     .build();
         }).collect(Collectors.toList());
 
@@ -316,6 +318,7 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
                 .createdAt(dist.getCreatedAt())
                 .status(dist.getStatus() == null ? null : dist.getStatus().name())
                 .notes(dist.getNotes())
+                .isOptimized(dist.isOptimized())
                 .build();
 
         return response;
@@ -396,6 +399,7 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
                     .createdAt(d.getCreatedAt())
                     .status(d.getStatus() == null ? null : d.getStatus().name())
                     .notes(d.getNotes())
+                    .isOptimized(d.isOptimized())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -460,6 +464,7 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
                 .createdAt(updated.getCreatedAt())
                 .status(updated.getStatus() == null ? null : updated.getStatus().name())
                 .notes(updated.getNotes())
+                .isOptimized(updated.isOptimized())
                 .build();
     }
 }
