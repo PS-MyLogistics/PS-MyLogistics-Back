@@ -314,4 +314,82 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
         return response;
 
     }
+
+    @Override
+    public List<DistributionResponse> getDistributionsForDealer() {
+        UUID tenantFromContext = TenantContextHolder.getTenant();
+        if (tenantFromContext == null) {
+            throw new OrderServiceException("Invalid tenant context for distribution", HttpStatus.FORBIDDEN);
+        }
+
+        // Obtener usuario autenticado desde el SecurityContext
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new OrderServiceException("No authenticated user", HttpStatus.FORBIDDEN);
+        }
+
+        UUID authenticatedUserId = null;
+        Object principal = auth.getPrincipal();
+        if (principal instanceof CustomUserDetails) {
+            CustomUserDetails cud = (CustomUserDetails) principal;
+            if (cud.getUser() != null) {
+                authenticatedUserId = cud.getUser().getId();
+            }
+        }
+
+        if (authenticatedUserId == null) {
+            throw new OrderServiceException("Authenticated user id not available", HttpStatus.FORBIDDEN);
+        }
+
+        // Make final for lambda usage
+        final UUID finalAuthenticatedUserId = authenticatedUserId;
+
+        // Buscar todas las distribuciones del tenant donde el dealer es el usuario autenticado
+        List<Distribution> distributions = distributionRepository.findAllByTenantId(tenantFromContext);
+
+        // Filtrar solo las distribuciones asignadas al dealer autenticado
+        List<Distribution> dealerDistributions = distributions.stream()
+                .filter(d -> d.getDealer() != null && d.getDealer().getId().equals(finalAuthenticatedUserId))
+                .collect(Collectors.toList());
+
+        if (dealerDistributions.isEmpty()) {
+            throw new OrderServiceException("No distributions found for this dealer", HttpStatus.NOT_FOUND);
+        }
+
+        // Convertir a DTO
+        return dealerDistributions.stream().map(d -> {
+            List<UUID> orderIdsAux = d.getOrders() == null
+                    ? new ArrayList<>()
+                    : d.getOrders().stream().map(Order::getId).collect(Collectors.toList());
+
+            // preparar ordersOptimized y mapa de optimización si corresponde
+            List<UUID> ordersOptimizedAux = d.getOrdersOptimized() == null
+                    ? new ArrayList<>()
+                    : d.getOrdersOptimized().stream().map(Order::getId).collect(Collectors.toList());
+
+            Boolean isOptimized = Boolean.FALSE;
+            Map<Integer, UUID> optimizationRoute = null;
+            if (d.isOptimized()) {
+                isOptimized = Boolean.TRUE;
+                optimizationRoute = new LinkedHashMap<>();
+                for (int i = 0; i < ordersOptimizedAux.size(); i++) {
+                    optimizationRoute.put(i + 1, ordersOptimizedAux.get(i));
+                }
+            }
+
+            return DistributionResponse.builder()
+                    .id(d.getId())
+                    .tenantId(d.getTenantId())
+                    .orderIds(orderIdsAux)
+                    .optimizatedRoute(optimizationRoute)
+                    .dealerId(d.getDealer() == null ? null : d.getDealer().getId())
+                    .vehicleId(d.getVehicle() == null ? null : d.getVehicle().getId())
+                    .startProgramDateTime(d.getStartProgramDateTime())
+                    .endProgramDateTime(d.getEndProgramDateTime())
+                    .createdAt(d.getCreatedAt())
+                    .status(d.getStatus() == null ? null : d.getStatus().name())
+                    .notes(d.getNotes())
+                    .build();
+        }).collect(Collectors.toList());
+    }
 }

@@ -46,5 +46,6 @@ public class CustomerCreationRequest {
     private String notes;
     private String type; // REGULAR, VIP, WHOLESALE
     private Boolean isActive;
+    private String zoneId; // UUID de la zona
 }
 

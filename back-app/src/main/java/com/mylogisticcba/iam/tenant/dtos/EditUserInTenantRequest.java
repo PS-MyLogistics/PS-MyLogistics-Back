@@ -26,4 +26,6 @@ public class EditUserInTenantRequest {
     private String stateOrProvince;
 
     private String newPassword;
+
+    private UUID vehicleId;
 }

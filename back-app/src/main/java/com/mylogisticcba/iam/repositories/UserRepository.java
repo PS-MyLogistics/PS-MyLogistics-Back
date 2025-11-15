@@ -1,6 +1,7 @@
 package com.mylogisticcba.iam.repositories;
 
 import com.mylogisticcba.iam.tenant.entity.UserEntity;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,6 +15,10 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     Optional<List<UserEntity>> findByTenant_Id(UUID tenantId);
 
+    @EntityGraph(attributePaths = {"vehicle"})
+    Optional<List<UserEntity>> findWithVehiclesByTenant_Id(UUID tenantId);
+
+    List<UserEntity> findByVehicle_Id(UUID vehicleId);
 
     boolean existsByUsernameAndOwnerTrue(String username);
 

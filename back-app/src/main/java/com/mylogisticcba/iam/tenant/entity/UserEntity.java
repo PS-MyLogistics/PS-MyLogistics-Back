@@ -58,6 +58,10 @@ public class UserEntity {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     private List<Role> roles = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id")
+    private com.mylogisticcba.core.entity.Vehicle vehicle;
+
 
     @PrePersist
     public void prePersist() {

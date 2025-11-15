@@ -62,7 +62,9 @@ public class Customer {
     @Builder.Default
     private CustomerType type = CustomerType.REGULAR;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "zone_id")
+    private Zone zone;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

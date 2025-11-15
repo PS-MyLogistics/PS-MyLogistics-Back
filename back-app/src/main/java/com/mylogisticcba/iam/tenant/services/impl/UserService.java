@@ -40,6 +40,7 @@ public class UserService implements com.mylogisticcba.iam.tenant.services.UserSe
     private final TenantRepository tenantRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private  final VerificarionTokenRepository verificarionTokenRepository;
+    private final com.mylogisticcba.core.repository.distribution.VehicleRepository vehicleRepository;
 
     @Qualifier("defaultModelMapper")
     private final ModelMapper modelMapper;
@@ -93,7 +94,18 @@ public class UserService implements com.mylogisticcba.iam.tenant.services.UserSe
         user.setCity(request.getCity());
         user.setStateOrProvince(request.getStateOrProvince());
 
-        UserDto dto=  modelMapper.map(saveUserInTenant(user),UserDto.class);
+        // Asignar vehículo si se proporciona
+        if (request.getVehicleId() != null) {
+            com.mylogisticcba.core.entity.Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
+                    .orElseThrow(() -> new UserServiceException("Vehicle not found"));
+            if (!vehicle.getTenantId().equals(tenantId)) {
+                throw new UserServiceException("Vehicle does not belong to this tenant");
+            }
+            user.setVehicle(vehicle);
+        }
+
+        UserEntity savedUser = saveUserInTenant(user);
+        UserDto dto = toDto(savedUser);
 
         VerificationToken vToken = verificarionTokenRepository.save(VerificationToken.builder()
                                 .id(UUID.randomUUID())
@@ -152,18 +164,34 @@ public class UserService implements com.mylogisticcba.iam.tenant.services.UserSe
         if(request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         }
-        UserDto dto = modelMapper.map(userRepository.save(user), UserDto.class);
+
+        // Actualizar o remover vehículo
+        if (request.getVehicleId() != null) {
+            com.mylogisticcba.core.entity.Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
+                    .orElseThrow(() -> new UserServiceException("Vehicle not found"));
+            if (!vehicle.getTenantId().equals(tenantId)) {
+                throw new UserServiceException("Vehicle does not belong to this tenant");
+            }
+            user.setVehicle(vehicle);
+        } else {
+            // Si vehicleId es null, remover el vehículo asignado
+            user.setVehicle(null);
+        }
+
+        UserEntity savedUser = userRepository.save(user);
+        UserDto dto = toDto(savedUser);
 
         return dto;
     }
 
+    @Transactional
     public List<UserDto> getUsersByTenant() {
         UUID tenantId = TenantContextHolder.getTenant();
-        List<UserEntity>users = userRepository.findByTenant_Id(tenantId).orElseThrow(()
+        List<UserEntity>users = userRepository.findWithVehiclesByTenant_Id(tenantId).orElseThrow(()
                 -> new EntityNotFoundException("users not found"));
 
         List<UserDto> userDtos = new ArrayList<>();
-        users.forEach(user ->userDtos.add(modelMapper.map(user, UserDto.class)) );
+        users.forEach(user ->userDtos.add(toDto(user)) );
         return userDtos;
     }
 
@@ -198,11 +226,60 @@ public class UserService implements com.mylogisticcba.iam.tenant.services.UserSe
         return user;
     }
 
+    public UserDto getUserByUsername(String username) {
+        UUID tenantId = TenantContextHolder.getTenant();
+        UserEntity user = userRepository.findByUsernameAndTenant_Id(username, tenantId)
+                .orElseThrow(() -> new UserServiceException("User not found in this space"));
+        return toDto(user);
+    }
+
     private UserEntity saveUserInTenant(UserEntity user) {
         if(userRepository.existsByUsernameAndTenant_Id(user.getUsername(), user.getTenant().getId())) {
             throw new RuntimeException("Username already exists in this tenant");
         }
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(UUID userId) {
+        UUID tenantId = TenantContextHolder.getTenant();
+
+        // Buscar el usuario existente
+        UserEntity user = userRepository.findByIdAndTenant_Id(userId, tenantId)
+                .orElseThrow(() -> new UserServiceException("User not found in tenant"));
+
+        // Validar que no sea un owner
+        if(user.isOwner() || user.getRoles().contains(Role.OWNER)) {
+            throw new UserServiceException("Cannot delete owner user");
+        }
+
+        // Validar que no sea un admin
+        if (user.getRoles().contains(Role.ADMIN)) {
+            throw new UserServiceException("Cannot delete admin user");
+        }
+
+        // Validar que no sea un superadmin
+        if (user.getRoles().contains(Role.SUPERADMIN)) {
+            throw new UserServiceException("Cannot delete superAdmin user");
+        }
+
+        // Eliminar el usuario
+        userRepository.delete(user);
+    }
+
+    /**
+     * Convierte UserEntity a UserDto incluyendo información del vehículo
+     */
+    private UserDto toDto(UserEntity user) {
+        UserDto dto = modelMapper.map(user, UserDto.class);
+
+        // Mapear información del vehículo si existe
+        if (user.getVehicle() != null) {
+            dto.setVehicleId(user.getVehicle().getId().toString());
+            dto.setVehiclePlate(user.getVehicle().getPlate());
+        }
+
+        return dto;
     }
 
 

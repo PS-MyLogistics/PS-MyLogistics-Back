@@ -12,9 +12,14 @@ public class UserDto {
     private String username;
     private String email;
     private String telephone;
+    private String address;
+    private String city;
+    private String stateOrProvince;
     List<Role> roles;
     boolean  owner;
     UserStatus status;
+    private String vehicleId;
+    private String vehiclePlate;
 
 
 }

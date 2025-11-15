@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 public class ProductCreationRequest {
     private String name;
     private String description;
-    private String sku;
+    private String sku; // Opcional - se genera automáticamente si está vacío
     private Double price;
 }

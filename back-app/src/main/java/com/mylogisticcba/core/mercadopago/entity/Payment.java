@@ -32,6 +32,4 @@ public class Payment {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
-
 }

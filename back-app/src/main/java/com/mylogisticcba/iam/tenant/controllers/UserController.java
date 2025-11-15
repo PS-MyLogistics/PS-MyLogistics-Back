@@ -11,9 +11,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users/")
@@ -29,7 +31,7 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER', 'DEALER')")
     @GetMapping("/getAll")
     public ResponseEntity<List<UserDto>> getUsers() {
         return ResponseEntity.ok(service.getUsersByTenant());
@@ -47,6 +49,12 @@ public class UserController {
         return ResponseEntity.ok(service.editUserDealerInTenant(req));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
+        String username = authentication.getName();
+        UserDto currentUser = service.getUserByUsername(username);
+        return ResponseEntity.ok(currentUser);
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<AuthResponse> logout(@CookieValue(name = "refreshToken") String refreshTokenCookie) {
@@ -62,6 +70,13 @@ public class UserController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(response);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+        service.deleteUser(userId);
+        return ResponseEntity.noContent().build();
     }
 
 
