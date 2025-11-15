@@ -31,29 +31,14 @@ public class DistributionController {
         return ResponseEntity.ok(resp);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OWNER','DEALER')")
     @GetMapping("/{id}")
     public ResponseEntity<DistributionResponse> getDistributionById(@PathVariable UUID id) {
-        Distribution dist = distributionService.getDistributionById(id);
-
-        DistributionResponse resp = DistributionResponse.builder()
-                .id(dist.getId())
-                .tenantId(dist.getTenantId())
-                .orderIds(dist.getOrders().stream().map(o -> o.getId()).collect(Collectors.toList()))
-                .dealerId(dist.getDealer() == null ? null : dist.getDealer().getId())
-                .vehicleId(dist.getVehicle() == null ? null : dist.getVehicle().getId())
-                .startProgramDateTime(dist.getStartProgramDateTime())
-                .endProgramDateTime(dist.getEndProgramDateTime())
-                .createdAt(dist.getCreatedAt())
-                .status(dist.getStatus() == null ? null : dist.getStatus().name())
-                .notes(dist.getNotes())
-                .isOptimized(dist.isOptimized())
-                .build();
-
+        DistributionResponse resp = distributionService.getDistributionByIdWithRoleValidation(id);
         return ResponseEntity.ok(resp);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OWNER','DEALER')")
     @GetMapping("/getAll")
     public ResponseEntity<List<DistributionResponse>> getAllDistribution() {
         List<DistributionResponse> resp = distributionService.getAll();

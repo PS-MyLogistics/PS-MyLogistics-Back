@@ -214,6 +214,18 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
             throw new OrderServiceException("No distributions found", HttpStatus.NOT_FOUND);
         }
 
+        // Filtrar por dealer si el usuario autenticado es DEALER
+        UUID authenticatedUserId = getAuthenticatedUserId();
+        if (authenticatedUserId != null && isUserDealer()) {
+            dist = dist.stream()
+                    .filter(d -> d.getDealer() != null && d.getDealer().getId().equals(authenticatedUserId))
+                    .collect(Collectors.toList());
+
+            if (dist.isEmpty()) {
+                throw new OrderServiceException("No distributions found for this dealer", HttpStatus.NOT_FOUND);
+            }
+        }
+
         return dist.stream().map(d -> {
             List<UUID> orderIdsAux = d.getOrders() == null
                     ? new ArrayList<>()
@@ -466,5 +478,100 @@ public class DistributionService implements com.mylogisticcba.core.service.Distr
                 .notes(updated.getNotes())
                 .isOptimized(updated.isOptimized())
                 .build();
+    }
+
+    /**
+     * Obtiene una distribución por ID con validación de rol.
+     * Si el usuario es DEALER, valida que la distribución le pertenezca.
+     */
+    @Override
+    public DistributionResponse getDistributionByIdWithRoleValidation(UUID id) {
+        if (id == null) {
+            throw new OrderServiceException("distributionId required", HttpStatus.BAD_REQUEST);
+        }
+
+        Distribution dist = distributionRepository.findById(id)
+                .orElseThrow(() -> new OrderServiceException(
+                        String.format("No se encontró la distribución con ID '%s'.", id),
+                        HttpStatus.NOT_FOUND
+                ));
+
+        UUID tenantFromContext = TenantContextHolder.getTenant();
+        if (tenantFromContext == null || !tenantFromContext.equals(dist.getTenantId())) {
+            throw new OrderServiceException("Invalid tenant context for distribution", HttpStatus.FORBIDDEN);
+        }
+
+        // Si el usuario es DEALER, validar que la distribución le pertenezca
+        UUID authenticatedUserId = getAuthenticatedUserId();
+        if (authenticatedUserId != null && isUserDealer()) {
+            if (dist.getDealer() == null || !authenticatedUserId.equals(dist.getDealer().getId())) {
+                throw new OrderServiceException(
+                        "No tienes permiso para acceder a esta distribución.",
+                        HttpStatus.FORBIDDEN
+                );
+            }
+        }
+
+        // Preparar ordersOptimized y mapa de optimización si corresponde
+        List<UUID> ordersOptimizedAux = dist.getOrdersOptimized() == null
+                ? new ArrayList<>()
+                : dist.getOrdersOptimized().stream().map(Order::getId).collect(Collectors.toList());
+
+        Boolean isOptimized = Boolean.FALSE;
+        Map<Integer, UUID> optimizationRoute = null;
+        if (dist.isOptimized()) {
+            isOptimized = Boolean.TRUE;
+            optimizationRoute = new LinkedHashMap<>();
+            for (int i = 0; i < ordersOptimizedAux.size(); i++) {
+                optimizationRoute.put(i + 1, ordersOptimizedAux.get(i));
+            }
+        }
+
+        return DistributionResponse.builder()
+                .id(dist.getId())
+                .tenantId(dist.getTenantId())
+                .orderIds(dist.getOrders().stream().map(Order::getId).collect(Collectors.toList()))
+                .optimizatedRoute(optimizationRoute)
+                .dealerId(dist.getDealer() == null ? null : dist.getDealer().getId())
+                .vehicleId(dist.getVehicle() == null ? null : dist.getVehicle().getId())
+                .startProgramDateTime(dist.getStartProgramDateTime())
+                .endProgramDateTime(dist.getEndProgramDateTime())
+                .createdAt(dist.getCreatedAt())
+                .status(dist.getStatus() == null ? null : dist.getStatus().name())
+                .notes(dist.getNotes())
+                .isOptimized(dist.isOptimized())
+                .build();
+    }
+
+    /**
+     * Obtiene el ID del usuario autenticado desde el SecurityContext
+     */
+    private UUID getAuthenticatedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null) {
+            return null;
+        }
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof CustomUserDetails) {
+            CustomUserDetails cud = (CustomUserDetails) principal;
+            if (cud.getUser() != null) {
+                return cud.getUser().getId();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Verifica si el usuario autenticado tiene el rol DEALER
+     */
+    private boolean isUserDealer() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getAuthorities() == null) {
+            return false;
+        }
+
+        return auth.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_DEALER"));
     }
 }

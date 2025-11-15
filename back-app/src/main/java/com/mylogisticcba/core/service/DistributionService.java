@@ -24,6 +24,9 @@ public interface DistributionService {
 
     List<DistributionResponse> getDistributionsForDealer();
 
+    // Obtiene una distribución por ID con validación de rol (DEALER solo ve las suyas)
+    DistributionResponse getDistributionByIdWithRoleValidation(UUID id);
+
     // Actualiza el estado de una distribución
     DistributionResponse updateDistributionStatus(UUID id, DistributionStatusUpdateRequest request);
 }
