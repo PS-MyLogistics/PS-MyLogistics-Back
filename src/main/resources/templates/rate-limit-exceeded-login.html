@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cuenta Suspendida Temporalmente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f0f4ff; font-family: Arial, Helvetica, sans-serif; line-height: 1.4;">
+
+<!-- Contenedor principal -->
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f0f4ff;">
+    <tr>
+        <td align="center" style="padding: 20px 10px;">
+
+            <!-- Email container -->
+            <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);">
+
+                <!-- Header -->
+                <tr>
+                    <td align="center" style="background-color: #667eea; padding: 35px 20px; color: #ffffff;">
+                        <div style="font-size: 32px; margin-bottom: 12px;">⏳</div>
+                        <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff;">
+                            Cuenta Suspendida Temporalmente
+                        </h1>
+                        <p style="margin: 8px 0 0 0; font-size: 14px; color: #f8f9fa; opacity: 0.9;">
+                            Medida de seguridad automática
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Contenido principal -->
+                <tr>
+                    <td style="padding: 30px 25px; background-color: #ffffff;">
+
+                        <!-- Caja de contenido -->
+                        <table cellpadding="0" cellspacing="0" width="100%" style="background-color: #fafbff; border: 2px solid #e3e8ff; border-radius: 8px;">
+                            <tr>
+                                <td style="padding: 25px;">
+
+                                    <!-- Saludo -->
+                                    <p style="margin: 0 0 18px 0; font-size: 16px; color: #667eea; font-weight: bold;">
+                                        ⚠️ ¡Hola <span th:text="${username}">Usuario</span>!
+                                    </p>
+
+                                    <p style="margin: 0 0 25px 0; font-size: 15px; color: #495057; line-height: 1.5;">
+                                        Su cuenta en <strong th:text="${tenantName}">My Logistic CBA</strong> ha sido <strong>suspendida temporalmente</strong> debido a múltiples intentos de acceso fallidos. Esta es una medida automática de protección.
+                                    </p>
+
+                                    <!-- Información de suspensión -->
+                                    <table cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td align="center" style="padding: 20px 0;">
+                                                <table cellpadding="0" cellspacing="0" style="background-color: #667eea; border-radius: 12px; width: 100%;">
+                                                    <tr>
+                                                        <td style="padding: 25px 30px; text-align: center;">
+                                                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+                                                                Información de la suspensión
+                                                            </p>
+                                                            <div style="background-color: #ffffff; border-radius: 8px; padding: 20px; margin: 10px 0; border: 2px solid #ddd; text-align: left;">
+                                                                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e9ecef;">
+                                                                    <strong style="color: #667eea; font-size: 14px;">⏱️ Duración de la suspensión:</strong>
+                                                                    <div style="font-size: 32px; font-weight: bold; color: #667eea; margin-top: 8px;">15 minutos</div>
+                                                                </div>
+                                                                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e9ecef;">
+                                                                    <strong style="color: #495057; font-size: 14px;">📊 Intentos fallidos detectados:</strong>
+                                                                    <div style="font-size: 24px; font-weight: bold; color: #dc3545; margin-top: 5px;" th:text="${attemptCount}">5</div>
+                                                                </div>
+                                                                <div style="margin-bottom: 10px;">
+                                                                    <strong style="color: #495057; font-size: 14px;">👤 Usuario:</strong>
+                                                                    <div style="color: #6c757d; margin-top: 5px; font-size: 14px;" th:text="${username}">usuario123</div>
+                                                                </div>
+                                                                <div style="margin-bottom: 10px;">
+                                                                    <strong style="color: #495057; font-size: 14px;">📧 Correo electrónico:</strong>
+                                                                    <div style="color: #6c757d; margin-top: 5px; font-size: 13px; word-break: break-all;" th:text="${email}">usuario@example.com</div>
+                                                                </div>
+                                                                <div>
+                                                                    <strong style="color: #495057; font-size: 14px;">🕐 Suspendida desde:</strong>
+                                                                    <div style="color: #6c757d; margin-top: 5px; font-size: 14px;" th:text="${#temporals.format(lastAttemptTime, 'dd/MM/yyyy HH:mm:ss')}+' UTC'">30/09/2025 14:30:00</div>
+                                                                </div>
+                                                            </div>
+                                                            <p style="margin: 8px 0 0 0; font-size: 11px; color: #ffffff; opacity: 0.9;">
+                                                                ✅ Reactivación automática en 15 minutos
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Qué hacer ahora -->
+                                    <table cellpadding="0" cellspacing="0" width="100%" style="margin-top: 20px;">
+                                        <tr>
+                                            <td style="background-color: #e3f2fd; border: 2px solid #2196f3; border-radius: 6px; padding: 15px;">
+                                                <p style="margin: 0; font-size: 13px; color: #0d47a1; line-height: 1.5;">
+                                                    <strong>ℹ️ ¿Qué hacer ahora?</strong><br>
+                                                    <strong>Si fue usted:</strong> Simplemente espere 15 minutos e intente acceder nuevamente con su contraseña correcta.<br><br>
+                                                    <strong>Si NO fue usted:</strong> Su cuenta está protegida. Considere cambiar su contraseña después de que se reactive el acceso.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- Sección de estado -->
+                <tr>
+                    <td style="padding: 0 25px 25px 25px; background-color: #ffffff;">
+                        <table cellpadding="0" cellspacing="0" width="100%" style="background-color: #fff3cd; border: 2px solid #ffc107; border-radius: 8px;">
+                            <tr>
+                                <td style="padding: 15px; text-align: center;">
+                                    <p style="margin: 0; font-size: 12px; font-weight: bold;">
+                                        <span style="color: #856404;">🔒 ESTADO:</span>
+                                        <span style="color: #495057;"> Suspensión temporal (15 min) • Reactivación automática • Sin acción requerida</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding: 25px; background-color: #f8f9ff; border-top: 1px solid #e9ecef;">
+
+                        <!-- Recomendaciones de seguridad -->
+                        <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 15px;">
+                            <tr>
+                                <td style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 12px;">
+                                    <p style="margin: 0; font-size: 12px; color: #155724; line-height: 1.5;">
+                                        <strong>🛡️ Recomendaciones de seguridad:</strong><br>
+                                        • Asegúrese de usar una contraseña segura y única<br>
+                                        • Revise los dispositivos con acceso a su cuenta
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Advertencia -->
+                        <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 15px;">
+                            <tr>
+                                <td style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; padding: 12px;">
+                                    <p style="margin: 0; font-size: 12px; color: #721c24; line-height: 1.5;">
+                                        <strong>⚠️ ¿No reconoce esta actividad?</strong> Si no intentó acceder a su cuenta, cambie su contraseña inmediatamente después de los 15 minutos y contacte a nuestro equipo de soporte.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Soporte -->
+                        <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 15px;">
+                            <tr>
+                                <td style="background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; padding: 12px;">
+                                    <p style="margin: 0; font-size: 12px; color: #1565c0;">
+                                        <strong>📞 Soporte:</strong>
+                                        <a href="mailto:mylogisticcba@outlook.com" style="color: #1976d2; text-decoration: underline; font-weight: bold;">
+                                            mylogisticcba@outlook.com
+                                        </a>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Copyright -->
+                        <table cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td align="center" style="background-color: #667eea; border-radius: 6px; padding: 12px;">
+                                    <p style="margin: 0; font-size: 11px; color: #ffffff; font-weight: bold;">
+                                        © 2025 <span>My Logistic CBA</span> | 🔒 Sistema de Seguridad Automático
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

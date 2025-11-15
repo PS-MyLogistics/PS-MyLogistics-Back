@@ -3,9 +3,15 @@ services:
   app:
     build: .
     ports:
-      - "8081:8081"  # Opcional: solo si querés acceso directo
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - "8081:8081"  # Opcional: solo si quiero acceso directo
+    env_file:
+      - .env
+    environment:  #Opcional :  inyectar envairoments 1x1 o usar env file (linea 7,8)para inyectar todas
+     - SPRING_PROFILES_ACTIVE=docker # para que spring use el application-docker.properties
+    # las siguientes fueron inyectadas con env_file
+    # - MYSQL_USER=${MYSQL_USER}
+    # - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    # - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     networks:
       - app-network
 
@@ -26,7 +32,7 @@ services:
   frontend:
     image: nginx:alpine # uso esta para que ande docker ya que perdi la imaagen de front del ejersicio (es una imagen vacia) # o build si construís localmente
     ports:
-      - "4200:4200"  # opcional si querés acceso directo
+      - "4200:4200"  # opcional si quiero acceso directo
     networks:
       - app-network
 
