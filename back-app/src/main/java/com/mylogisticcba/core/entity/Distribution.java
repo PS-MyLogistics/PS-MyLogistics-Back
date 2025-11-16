@@ -45,7 +45,7 @@ public class Distribution {
             inverseJoinColumns = @JoinColumn(name = "order_id")
     )
     private List<Order> ordersOptimized = new ArrayList<>();
-
+    
     @Column(name = "is_optimized")
     private boolean isOptimized;
 

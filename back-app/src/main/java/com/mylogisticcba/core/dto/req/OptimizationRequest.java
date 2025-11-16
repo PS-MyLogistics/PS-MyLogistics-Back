@@ -17,6 +17,7 @@ public class OptimizationRequest {
     private List<UUID> orderIds;
     // Opcional: número de vehículos a usar (por defecto 1)
     private Integer vehicleCount;
-    // Perfil de routing: driving-car, cycling-regular, foot-walking, etc.
+    // Perfil de routing: driving-car, cycling-regular, foot-walkg
     private String profile;
+
 }
