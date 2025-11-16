@@ -14,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +29,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter  extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -105,6 +107,10 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 TenantContextHolder.setTenant(tenantId);
+
+                // Debug: imprimir información de autenticación para diagnosticar 403 en endpoints específicos
+                logger.info("[JWT-AUTH] Authentication set. Principal=" + SecurityContextHolder.getContext().getAuthentication().getPrincipal().getClass().getSimpleName());
+                logger.info("[JWT-AUTH] Authorities=" + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
 
                 filterChain.doFilter(request, response);
         }

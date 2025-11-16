@@ -55,7 +55,6 @@ public class AuthService implements com.mylogisticcba.iam.security.auth.services
     private final TenantRepository tenantRepository ;
     private final PasswordEncoder passwordEncoder;
     private final VerificarionTokenRepository verificarionTokenRepository;
-    private final ApplicationEventPublisher eventPublisher;
     private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
     private final RateLimitService rateLimitService;
@@ -228,7 +227,7 @@ public class AuthService implements com.mylogisticcba.iam.security.auth.services
                 .tenantPhone(tenant.getContactPhone())
                 .build();
 
-        eventPublisher.publishEvent(tCreatedEvent);
+        applicationEventPublisher.publishEvent(tCreatedEvent);
 
         return  AuthResponse.builder()
                 .token("")
