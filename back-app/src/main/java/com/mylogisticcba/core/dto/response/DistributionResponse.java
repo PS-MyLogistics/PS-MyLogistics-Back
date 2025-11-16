@@ -26,6 +26,7 @@ public class DistributionResponse {
     private Instant createdAt;
     private String status;
     private String notes;
+    private boolean isOptimized;
     private Map<Integer,UUID>  optimizatedRoute; // Mapa de secuencia de paradas a Order ID
 }
 

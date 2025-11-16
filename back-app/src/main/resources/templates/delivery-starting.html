@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Su pedido está en camino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f0f4ff; font-family: Arial, Helvetica, sans-serif; line-height: 1.4;">
+
+<!-- Contenedor principal -->
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f0f4ff;">
+    <tr>
+        <td align="center" style="padding: 20px 10px;">
+
+            <!-- Email container -->
+            <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);">
+
+                <!-- Header con degradado -->
+                <tr>
+                    <td align="center" style="background-color: #667eea; background-image: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); padding: 35px 20px; color: #ffffff;">
+                        <div style="position: relative;">
+                            <table cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <div style="font-size: 48px; margin-bottom: 12px;">🚚</div>
+                                        <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                            ¡Su pedido está en camino!
+                                        </h1>
+                                        <p style="margin: 8px 0 0 0; font-size: 14px; color: #f8f9fa; opacity: 0.9;">
+                                            Nuestro repartidor se dirige a su domicilio
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Contenido principal -->
+                <tr>
+                    <td style="padding: 30px 25px; background-color: #ffffff;">
+
+                        <!-- Saludo -->
+                        <p style="margin: 0 0 18px 0; font-size: 16px; color: #667eea; font-weight: bold;">
+                            ¡Hola <span th:text="${customerName}">Cliente</span>! 👋
+                        </p>
+
+                        <p style="margin: 0 0 20px 0; font-size: 15px; color: #495057; line-height: 1.5;">
+                            Nos complace informarle que su pedido ha salido para entrega y está en camino a su domicilio.
+                        </p>
+
+                        <!-- Información del pedido -->
+                        <table cellpadding="0" cellspacing="0" width="100%" style="background-color: #fafbff; border: 2px solid #e3e8ff; border-radius: 8px; margin-bottom: 20px;">
+                            <tr>
+                                <td style="padding: 20px;">
+                                    <table cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td style="padding: 8px 0;">
+                                                <p style="margin: 0; font-size: 14px; color: #6c757d;">
+                                                    <strong style="color: #667eea;">📦 Número de Pedido:</strong>
+                                                    <span th:text="${orderNumber}" style="color: #495057; font-weight: bold;">#12345</span>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0;">
+                                                <p style="margin: 0; font-size: 14px; color: #6c757d;">
+                                                    <strong style="color: #667eea;">📍 Dirección de Entrega:</strong>
+                                                    <span th:text="${customerAddress}" style="color: #495057;">Dirección del cliente</span>
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+
+
+                        <!-- Agradecimiento -->
+                        <p style="margin: 20px 0 0 0; font-size: 15px; color: #495057; line-height: 1.5;">
+                            Gracias por confiar en nosotros. ¡Esperamos que disfrute de su pedido!
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding: 25px; background-color: #f8f9ff; border-top: 1px solid #e9ecef;">
+
+                        <!-- Soporte -->
+                        <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 15px;">
+                            <tr>
+                                <td style="background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; padding: 12px;">
+                                    <p style="margin: 0; font-size: 12px; color: #1565c0; text-align: center;">
+                                        <strong>📞 ¿Necesita ayuda?</strong>
+                                        <a href="mailto:mylogisticcba@outlook.com" style="color: #1976d2; text-decoration: underline; font-weight: bold;">
+                                            mylogisticcba@outlook.com
+                                        </a>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Copyright -->
+                        <table cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td align="center" style="background-color: #667eea; border-radius: 6px; padding: 12px;">
+                                    <p style="margin: 0; font-size: 11px; color: #ffffff; font-weight: bold;">
+                                        © 2025 My Logistic CBA | 🔒 Mensaje automático
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

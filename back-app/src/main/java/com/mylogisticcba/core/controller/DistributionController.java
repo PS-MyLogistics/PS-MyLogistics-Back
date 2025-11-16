@@ -1,6 +1,7 @@
 package com.mylogisticcba.core.controller;
 
 import com.mylogisticcba.core.dto.req.DistributionCreationRequest;
+import com.mylogisticcba.core.dto.req.DistributionStatusUpdateRequest;
 import com.mylogisticcba.core.dto.response.DistributionResponse;
 import com.mylogisticcba.core.entity.Distribution;
 import com.mylogisticcba.core.service.DistributionService;
@@ -30,28 +31,14 @@ public class DistributionController {
         return ResponseEntity.ok(resp);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OWNER','DEALER')")
     @GetMapping("/{id}")
     public ResponseEntity<DistributionResponse> getDistributionById(@PathVariable UUID id) {
-        Distribution dist = distributionService.getDistributionById(id);
-
-        DistributionResponse resp = DistributionResponse.builder()
-                .id(dist.getId())
-                .tenantId(dist.getTenantId())
-                .orderIds(dist.getOrders().stream().map(o -> o.getId()).collect(Collectors.toList()))
-                .dealerId(dist.getDealer() == null ? null : dist.getDealer().getId())
-                .vehicleId(dist.getVehicle() == null ? null : dist.getVehicle().getId())
-                .startProgramDateTime(dist.getStartProgramDateTime())
-                .endProgramDateTime(dist.getEndProgramDateTime())
-                .createdAt(dist.getCreatedAt())
-                .status(dist.getStatus() == null ? null : dist.getStatus().name())
-                .notes(dist.getNotes())
-                .build();
-
+        DistributionResponse resp = distributionService.getDistributionByIdWithRoleValidation(id);
         return ResponseEntity.ok(resp);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN','OWNER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OWNER','DEALER')")
     @GetMapping("/getAll")
     public ResponseEntity<List<DistributionResponse>> getAllDistribution() {
         List<DistributionResponse> resp = distributionService.getAll();
@@ -73,7 +60,13 @@ public class DistributionController {
         return ResponseEntity.ok(resp);
     }
 
-
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER', 'DEALER')")
+    @PutMapping("/{id}/status")
+    public ResponseEntity<DistributionResponse> updateDistributionStatus(
+            @PathVariable("id") UUID id,
+            @RequestBody DistributionStatusUpdateRequest request) {
+        DistributionResponse resp = distributionService.updateDistributionStatus(id, request);
+        return ResponseEntity.ok(resp);
+    }
 
 }

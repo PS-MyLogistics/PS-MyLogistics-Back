@@ -2,6 +2,7 @@ package com.mylogisticcba.core.service;
 
 
 import com.mylogisticcba.core.dto.req.OrderCreationRequest;
+import com.mylogisticcba.core.dto.req.OrderUpdateRequest;
 import com.mylogisticcba.core.dto.response.OrderCreatedResponse;
 import com.mylogisticcba.core.dto.response.OrderResponse;
 
@@ -15,4 +16,6 @@ public interface OrderService {
    List<OrderResponse> getAllOrders();
 
    OrderResponse getOrderById(UUID id);
+
+   OrderResponse updateOrder(UUID id, OrderUpdateRequest request);
 }

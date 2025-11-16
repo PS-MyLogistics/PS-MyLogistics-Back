@@ -4,6 +4,7 @@ import com.mylogisticcba.core.dto.req.CustomerCreationRequest;
 import com.mylogisticcba.core.dto.response.CustomerResponse;
 import com.mylogisticcba.core.entity.Customer;
 import com.mylogisticcba.core.entity.Zone;
+import com.mylogisticcba.core.exceptions.OrderServiceException;
 import com.mylogisticcba.core.repository.orders.CustomerRepository;
 import com.mylogisticcba.core.repository.orders.ZoneRepository;
 import com.mylogisticcba.core.service.CustomerService;
@@ -15,6 +16,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,10 +51,16 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse getCustomerById(UUID id) {
         UUID tenantId = TenantContextHolder.getTenant();
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + id));
+                .orElseThrow(() -> new OrderServiceException(
+                        String.format("No se encontró el cliente con ID '%s'. Verifica que el cliente exista.", id),
+                        HttpStatus.NOT_FOUND
+                ));
 
         if (!customer.getTenantId().equals(tenantId)) {
-            throw new EntityNotFoundException("Customer not found in this tenant");
+            throw new OrderServiceException(
+                    "No tienes permiso para acceder a este cliente.",
+                    HttpStatus.FORBIDDEN
+            );
         }
 
         return toResponse(customer);
@@ -69,8 +77,19 @@ public class CustomerServiceImpl implements CustomerService {
         // Asignar zona si se proporciona
         Zone zone = null;
         if (request.getZoneId() != null && !request.getZoneId().isBlank()) {
-            zone = zoneRepository.findByIdAndTenantId(UUID.fromString(request.getZoneId()), tenantId)
-                    .orElseThrow(() -> new EntityNotFoundException("Zone not found with id: " + request.getZoneId()));
+            try {
+                UUID zoneId = UUID.fromString(request.getZoneId());
+                zone = zoneRepository.findByIdAndTenantId(zoneId, tenantId)
+                        .orElseThrow(() -> new OrderServiceException(
+                                String.format("No se encontró la zona con ID '%s'. Por favor, verifica que la zona exista y esté asignada a tu organización.", request.getZoneId()),
+                                HttpStatus.BAD_REQUEST
+                        ));
+            } catch (IllegalArgumentException ex) {
+                throw new OrderServiceException(
+                        String.format("El ID de zona '%s' no tiene un formato válido. Debe ser un UUID válido.", request.getZoneId()),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
         }
 
         Customer customer = Customer.builder()
@@ -89,6 +108,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .notes(request.getNotes())
                 .type(parseCustomerType(request.getType()))
                 .zone(zone)
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .build();
 
         Customer saved = customerRepository.save(customer);
@@ -101,10 +121,16 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse updateCustomer(UUID id, CustomerCreationRequest request) {
         UUID tenantId = TenantContextHolder.getTenant();
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + id));
+                .orElseThrow(() -> new OrderServiceException(
+                        String.format("No se encontró el cliente con ID '%s'. Verifica que el cliente exista.", id),
+                        HttpStatus.NOT_FOUND
+                ));
 
         if (!customer.getTenantId().equals(tenantId)) {
-            throw new EntityNotFoundException("Customer not found in this tenant");
+            throw new OrderServiceException(
+                    "No tienes permiso para actualizar este cliente.",
+                    HttpStatus.FORBIDDEN
+            );
         }
 
         // Geocodificar solo si la dirección cambió
@@ -121,9 +147,20 @@ public class CustomerServiceImpl implements CustomerService {
 
         // Actualizar zona si se proporciona
         if (request.getZoneId() != null && !request.getZoneId().isBlank()) {
-            Zone zone = zoneRepository.findByIdAndTenantId(UUID.fromString(request.getZoneId()), tenantId)
-                    .orElseThrow(() -> new EntityNotFoundException("Zone not found with id: " + request.getZoneId()));
-            customer.setZone(zone);
+            try {
+                UUID zoneId = UUID.fromString(request.getZoneId());
+                Zone zone = zoneRepository.findByIdAndTenantId(zoneId, tenantId)
+                        .orElseThrow(() -> new OrderServiceException(
+                                String.format("No se encontró la zona con ID '%s'. Por favor, verifica que la zona exista y esté asignada a tu organización.", request.getZoneId()),
+                                HttpStatus.BAD_REQUEST
+                        ));
+                customer.setZone(zone);
+            } catch (IllegalArgumentException ex) {
+                throw new OrderServiceException(
+                        String.format("El ID de zona '%s' no tiene un formato válido. Debe ser un UUID válido.", request.getZoneId()),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
         } else {
             customer.setZone(null); // Remover zona si no se proporciona
         }
@@ -139,6 +176,7 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setDoorbell(request.getDoorbell());
         customer.setNotes(request.getNotes());
         customer.setType(parseCustomerType(request.getType()));
+        customer.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
 
         Customer updated = customerRepository.save(customer);
         log.info("Customer updated with id: {} for tenant: {}", updated.getId(), tenantId);
@@ -150,10 +188,16 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomer(UUID id) {
         UUID tenantId = TenantContextHolder.getTenant();
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + id));
+                .orElseThrow(() -> new OrderServiceException(
+                        String.format("No se encontró el cliente con ID '%s'. Verifica que el cliente exista.", id),
+                        HttpStatus.NOT_FOUND
+                ));
 
         if (!customer.getTenantId().equals(tenantId)) {
-            throw new EntityNotFoundException("Customer not found in this tenant");
+            throw new OrderServiceException(
+                    "No tienes permiso para eliminar este cliente.",
+                    HttpStatus.FORBIDDEN
+            );
         }
 
         customerRepository.delete(customer);
@@ -169,10 +213,37 @@ public class CustomerServiceImpl implements CustomerService {
                     .country(request.getCountry())
                     .postalCode(request.getPostalCode());
 
-            return geoService.getLatLngStructured(structuredAddress);
+            LatLng coordinates = geoService.getLatLngStructured(structuredAddress);
+
+            if (coordinates == null) {
+                String fullAddress = String.format("%s, %s, %s, %s, %s",
+                        request.getAddress(),
+                        request.getCity(),
+                        request.getState(),
+                        request.getCountry(),
+                        request.getPostalCode());
+                throw new OrderServiceException(
+                        String.format("La dirección '%s' no pudo ser validada. Por favor, verifica que todos los datos sean correctos y correspondan a una ubicación real.", fullAddress),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            return coordinates;
+        } catch (OrderServiceException e) {
+            // Re-lanzar excepciones de OrderService
+            throw e;
         } catch (Exception e) {
             log.error("Error geocoding address: {}", e.getMessage());
-            throw new RuntimeException("Error geocoding address: " + e.getMessage(), e);
+            String fullAddress = String.format("%s, %s, %s, %s, %s",
+                    request.getAddress(),
+                    request.getCity(),
+                    request.getState(),
+                    request.getCountry(),
+                    request.getPostalCode());
+            throw new OrderServiceException(
+                    String.format("Error al validar la dirección '%s'. %s", fullAddress, e.getMessage()),
+                    HttpStatus.BAD_REQUEST
+            );
         }
     }
 
@@ -203,7 +274,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .doorbell(customer.getDoorbell())
                 .notes(customer.getNotes())
                 .type(customer.getType().name())
-                .isActive(true) // El modelo actual no tiene isActive, siempre true
+                .isActive(customer.getIsActive() != null ? customer.getIsActive() : true)
                 .latitude(customer.getLatitude())
                 .longitude(customer.getLongitude())
                 .createdAt(customer.getCreatedAt());

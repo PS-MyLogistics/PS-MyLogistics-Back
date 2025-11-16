@@ -1,6 +1,7 @@
 package com.mylogisticcba.core.controller;
 
 import com.mylogisticcba.core.dto.req.OrderCreationRequest;
+import com.mylogisticcba.core.dto.req.OrderUpdateRequest;
 import com.mylogisticcba.core.dto.response.OrderCreatedResponse;
 import com.mylogisticcba.core.dto.response.OrderResponse;
 import com.mylogisticcba.core.service.OrderService;
@@ -41,6 +42,15 @@ public class OrderController {
     @PostMapping("create")
     public ResponseEntity<OrderCreatedResponse> createOrder(@Valid @RequestBody OrderCreationRequest request) {
         OrderCreatedResponse order = orderService.createOrder(request);
+        return ResponseEntity.ok(order);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER', 'DEALER')")
+    @PutMapping("update/{id}")
+    public ResponseEntity<OrderResponse> updateOrder(
+            @PathVariable("id") UUID id,
+            @RequestBody OrderUpdateRequest request) {
+        OrderResponse order = orderService.updateOrder(id, request);
         return ResponseEntity.ok(order);
     }
 

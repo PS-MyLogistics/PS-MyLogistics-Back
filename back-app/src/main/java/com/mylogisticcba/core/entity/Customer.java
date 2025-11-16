@@ -66,6 +66,10 @@ public class Customer {
     @JoinColumn(name = "zone_id")
     private Zone zone;
 
+    @Column(name = "is_active")
+    @Builder.Default
+    private Boolean isActive = true;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

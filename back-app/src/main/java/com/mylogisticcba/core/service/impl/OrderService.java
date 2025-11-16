@@ -3,6 +3,7 @@ package com.mylogisticcba.core.service.impl;
 import com.mylogisticcba.core.dto.req.CustomerCreationRequest;
 import com.mylogisticcba.core.dto.req.OrderCreationRequest;
 import com.mylogisticcba.core.dto.req.OrderItemRequest;
+import com.mylogisticcba.core.dto.req.OrderUpdateRequest;
 import com.mylogisticcba.core.dto.response.OrderCreatedResponse;
 import com.mylogisticcba.core.dto.response.OrderItemResponse;
 import com.mylogisticcba.core.dto.response.OrderResponse;
@@ -10,10 +11,12 @@ import com.mylogisticcba.core.entity.Customer;
 import com.mylogisticcba.core.entity.Order;
 import com.mylogisticcba.core.entity.OrderItem;
 import com.mylogisticcba.core.entity.Product;
+import com.mylogisticcba.core.entity.Zone;
 import com.mylogisticcba.core.exceptions.OrderServiceException;
 import com.mylogisticcba.core.repository.orders.CustomerRepository;
 import com.mylogisticcba.core.repository.orders.OrderRepository;
 import com.mylogisticcba.core.repository.orders.ProductRepository;
+import com.mylogisticcba.core.repository.orders.ZoneRepository;
 import com.mylogisticcba.core.service.rest.LatLng;
 import com.mylogisticcba.core.service.rest.NominatimGeoService;
 import com.mylogisticcba.core.service.rest.StructuredAddress;
@@ -39,15 +42,18 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final ZoneRepository zoneRepository;
     private final NominatimGeoService nominatimGeoService;
 
     public OrderService(OrderRepository orderRepository,
                         CustomerRepository customerRepository,
                         ProductRepository productRepository,
+                        ZoneRepository zoneRepository,
                         NominatimGeoService nominatimGeoService) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.zoneRepository = zoneRepository;
         this.nominatimGeoService = nominatimGeoService;
     }
 
@@ -85,15 +91,37 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
 
             LatLng latLng = nominatimGeoService.getLatLngStructured(address);
 
-            if (latLng != null) {
-                log.info("Geocodificación exitosa: lat={}, lon={}", latLng.getLat(), latLng.getLon());
+            if (latLng == null) {
+                String fullAddress = String.format("%s, %s, %s, %s, %s",
+                        cReq.getAddress(),
+                        cReq.getCity(),
+                        cReq.getState(),
+                        cReq.getCountry(),
+                        cReq.getPostalCode());
+                throw new OrderServiceException(
+                        String.format("La dirección '%s' no pudo ser validada. Por favor, verifica que todos los datos sean correctos y correspondan a una ubicación real.", fullAddress),
+                        HttpStatus.BAD_REQUEST
+                );
             }
 
+            log.info("Geocodificación exitosa: lat={}, lon={}", latLng.getLat(), latLng.getLon());
             return latLng;
 
+        } catch (OrderServiceException ex) {
+            // Re-lanzar excepciones de OrderService
+            throw ex;
         } catch (Exception ex) {
-            log.warn("Error geocodificando dirección: {}. Continuando sin coordenadas.", ex.getMessage());
-            return null; // No fallar por problemas de geocodificación
+            log.error("Error geocodificando dirección: {}", ex.getMessage());
+            String fullAddress = String.format("%s, %s, %s, %s, %s",
+                    cReq.getAddress(),
+                    cReq.getCity(),
+                    cReq.getState(),
+                    cReq.getCountry(),
+                    cReq.getPostalCode());
+            throw new OrderServiceException(
+                    String.format("Error al validar la dirección '%s'. %s", fullAddress, ex.getMessage()),
+                    HttpStatus.BAD_REQUEST
+            );
         }
     }
 
@@ -111,7 +139,7 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
 
         if (customer == null) {
             throw new OrderServiceException(
-                    "CustomerId no provisto y customerCreationRequest ausente o inválido",
+                    "Debes proporcionar un ID de cliente existente o los datos completos para crear un nuevo cliente.",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -134,7 +162,7 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
 
             if (productOpt.isEmpty()) {
                 throw new OrderServiceException(
-                        "Producto no encontrado: " + itemReq.getProductId(),
+                        String.format("No se encontró el producto con ID '%s'. Verifica que el producto exista en tu catálogo.", itemReq.getProductId()),
                         HttpStatus.BAD_REQUEST
                 );
             }
@@ -214,6 +242,24 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
 
         UUID tenantId = TenantContextHolder.getTenant();
 
+        // Buscar zona si se proporciona zoneId
+        Zone zone = null;
+        if (cReq.getZoneId() != null && !cReq.getZoneId().isBlank()) {
+            try {
+                UUID zoneId = UUID.fromString(cReq.getZoneId());
+                zone = zoneRepository.findByIdAndTenantId(zoneId, tenantId)
+                        .orElseThrow(() -> new OrderServiceException(
+                                String.format("No se encontró la zona con ID '%s'. Por favor, verifica que la zona exista y esté asignada a tu organización.", cReq.getZoneId()),
+                                HttpStatus.BAD_REQUEST
+                        ));
+            } catch (IllegalArgumentException ex) {
+                throw new OrderServiceException(
+                        String.format("El ID de zona '%s' no tiene un formato válido. Debe ser un UUID válido.", cReq.getZoneId()),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+        }
+
         Customer newCustomer = Customer.builder()
                 .tenantId(tenantId)
                 .name(cReq.getName())
@@ -228,6 +274,8 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
                 .country(cReq.getCountry())
                 .notes(cReq.getNotes())
                 .doorbell(cReq.getDoorbell())
+                .zone(zone)
+                .isActive(cReq.getIsActive() != null ? cReq.getIsActive() : true)
                 .build();
 
         // Intentar parsear el tipo de customer
@@ -263,6 +311,50 @@ public class OrderService implements com.mylogisticcba.core.service.OrderService
         }
 
         return toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse updateOrder(UUID id, OrderUpdateRequest request) {
+        UUID tenantId = TenantContextHolder.getTenant();
+
+        // Buscar la orden
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderServiceException(
+                        "Order not found with id: " + id,
+                        HttpStatus.NOT_FOUND
+                ));
+
+        // Verificar que pertenezca al tenant
+        if (!order.getTenantId().equals(tenantId)) {
+            throw new OrderServiceException(
+                    "Order not found in this tenant",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        // Actualizar el status si viene en el request
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            try {
+                Order.OrderStatus newStatus = Order.OrderStatus.valueOf(request.getStatus().toUpperCase());
+                order.setStatus(newStatus);
+            } catch (IllegalArgumentException e) {
+                throw new OrderServiceException(
+                        "Invalid status: " + request.getStatus(),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+        }
+
+        // Actualizar notas si vienen en el request
+        if (request.getNotes() != null) {
+            order.setNotes(request.getNotes());
+        }
+
+        // Guardar cambios
+        Order updated = orderRepository.save(order);
+
+        return toOrderResponse(updated);
     }
 
     private OrderResponse toOrderResponse(Order order) {
