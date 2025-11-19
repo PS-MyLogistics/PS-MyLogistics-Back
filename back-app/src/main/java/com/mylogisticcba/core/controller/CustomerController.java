@@ -2,6 +2,7 @@ package com.mylogisticcba.core.controller;
 
 import com.mylogisticcba.core.dto.req.CustomerCreationRequest;
 import com.mylogisticcba.core.dto.response.CustomerResponse;
+import com.mylogisticcba.core.dto.response.CustomerWithLastOrderResponse;
 import com.mylogisticcba.core.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -56,5 +57,18 @@ public class CustomerController {
     public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
         customerService.deleteCustomer(UUID.fromString(id));
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Obtiene la lista de clientes con información de su último pedido
+     * @param daysSinceLastOrder Número de días desde el último pedido (opcional, 0 = todos)
+     * @return Lista de clientes con información del último pedido
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER', 'DEALER')")
+    @GetMapping("/with-last-order")
+    public ResponseEntity<List<CustomerWithLastOrderResponse>> getCustomersWithLastOrder(
+            @RequestParam(required = false, defaultValue = "0") Integer daysSinceLastOrder) {
+        List<CustomerWithLastOrderResponse> customers = customerService.getCustomersWithLastOrder(daysSinceLastOrder);
+        return ResponseEntity.ok(customers);
     }
 }

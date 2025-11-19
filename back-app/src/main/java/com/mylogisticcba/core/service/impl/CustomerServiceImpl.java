@@ -2,10 +2,13 @@ package com.mylogisticcba.core.service.impl;
 
 import com.mylogisticcba.core.dto.req.CustomerCreationRequest;
 import com.mylogisticcba.core.dto.response.CustomerResponse;
+import com.mylogisticcba.core.dto.response.CustomerWithLastOrderResponse;
 import com.mylogisticcba.core.entity.Customer;
+import com.mylogisticcba.core.entity.Order;
 import com.mylogisticcba.core.entity.Zone;
 import com.mylogisticcba.core.exceptions.OrderServiceException;
 import com.mylogisticcba.core.repository.orders.CustomerRepository;
+import com.mylogisticcba.core.repository.orders.OrderRepository;
 import com.mylogisticcba.core.repository.orders.ZoneRepository;
 import com.mylogisticcba.core.service.CustomerService;
 import com.mylogisticcba.core.service.rest.LatLng;
@@ -16,10 +19,15 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,11 +37,14 @@ public class CustomerServiceImpl implements CustomerService {
     private static final Logger log = LoggerFactory.getLogger(CustomerServiceImpl.class);
 
     private final CustomerRepository customerRepository;
+    private final OrderRepository orderRepository;
     private final ZoneRepository zoneRepository;
     private final NominatimGeoService geoService;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, ZoneRepository zoneRepository, NominatimGeoService geoService) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, OrderRepository orderRepository,
+                              ZoneRepository zoneRepository, NominatimGeoService geoService) {
         this.customerRepository = customerRepository;
+        this.orderRepository = orderRepository;
         this.zoneRepository = zoneRepository;
         this.geoService = geoService;
     }
@@ -287,5 +298,70 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         return builder.build();
+    }
+
+    @Override
+    public List<CustomerWithLastOrderResponse> getCustomersWithLastOrder(Integer daysSinceLastOrder) {
+        UUID tenantId = TenantContextHolder.getTenant();
+
+        // Obtener todos los clientes del tenant
+        List<Customer> customers = customerRepository.findByTenantId(tenantId);
+
+        List<CustomerWithLastOrderResponse> result = new ArrayList<>();
+        Instant now = Instant.now();
+
+        for (Customer customer : customers) {
+            // Obtener el último pedido del cliente
+            Optional<Order> lastOrderOpt = orderRepository.findLatestByCustomerIdAndTenantId(
+                customer.getId(),
+                tenantId,
+                PageRequest.of(0, 1)
+            ).stream().findFirst();
+
+            // Si el cliente no tiene pedidos, saltarlo
+            if (lastOrderOpt.isEmpty()) {
+                continue;
+            }
+
+            Order lastOrder = lastOrderOpt.get();
+
+            // Calcular días desde el último pedido
+            long daysSince = Duration.between(lastOrder.getCreatedAt(), now).toDays();
+
+            // Aplicar filtro de días si está presente
+            if (daysSinceLastOrder != null && daysSinceLastOrder > 0) {
+                if (daysSince < daysSinceLastOrder) {
+                    continue; // Saltar clientes que no cumplen con el filtro
+                }
+            }
+
+            // Contar total de pedidos del cliente
+            Long totalOrders = orderRepository.countByCustomerIdAndTenantId(customer.getId(), tenantId);
+
+            // Construir el DTO de respuesta
+            CustomerWithLastOrderResponse response = CustomerWithLastOrderResponse.builder()
+                .customerId(customer.getId())
+                .customerName(customer.getName())
+                .email(customer.getEmail())
+                .phoneNumber(customer.getPhoneNumber())
+                .address(customer.getAddress())
+                .type(customer.getType() != null ? customer.getType().name() : null)
+                .lastOrderId(lastOrder.getId())
+                .lastOrderNumber(lastOrder.getOrderNumber())
+                .lastOrderDate(lastOrder.getCreatedAt())
+                .lastOrderAmount(lastOrder.getTotalAmount())
+                .lastOrderStatus(lastOrder.getStatus() != null ? lastOrder.getStatus().name() : null)
+                .daysSinceLastOrder(daysSince)
+                .totalOrders(totalOrders)
+                .build();
+
+            result.add(response);
+        }
+
+        // Ordenar por días desde el último pedido (más inactivos primero)
+        result.sort((a, b) -> Long.compare(b.getDaysSinceLastOrder(), a.getDaysSinceLastOrder()));
+
+        log.info("Retrieved {} customers with last order for tenant: {}", result.size(), tenantId);
+        return result;
     }
 }
