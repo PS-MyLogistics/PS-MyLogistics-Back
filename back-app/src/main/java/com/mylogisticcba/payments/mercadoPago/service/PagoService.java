@@ -11,7 +11,7 @@ public interface PagoService {
      * @param request DTO con los datos del pago
      * @return El DTO del pago procesado (EXITOSO o FALLIDO)
      */
-    PagoResponse registrarPago(RegistrarPagoRequest request);
+    PagoResponse registrarPago(RegistrarPagoRequest request,Integer months);
 
 
     // ... (aquí podrían ir métodos como 'reembolsarPago', 'obtenerPagoPorId', etc.)

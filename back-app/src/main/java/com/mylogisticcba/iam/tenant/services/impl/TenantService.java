@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -84,6 +85,7 @@ public class TenantService  implements com.mylogisticcba.iam.tenant.services.Ten
     }
 
 
+    @Transactional
     public TenantEntity updateTenant(TenantEntity tenant) {
         if (tenant.getId() == null) {
             throw new AuthServiceException("Tenant ID is required for update");
@@ -105,8 +107,8 @@ public class TenantService  implements com.mylogisticcba.iam.tenant.services.Ten
         existingTenant.setStatus(tenant.getStatus());
         existingTenant.setUpdatedAt(tenant.getUpdatedAt() != null ? tenant.getUpdatedAt() : existingTenant.getUpdatedAt());
 
-        // Save updated tenant
-        return tenantRepository.save(existingTenant);
+        // Save updated tenant and flush to DB immediately
+        return tenantRepository.saveAndFlush(existingTenant);
     }
 
 
@@ -117,6 +119,7 @@ public class TenantService  implements com.mylogisticcba.iam.tenant.services.Ten
 
         //use modelmapper to map tenant to tenantInfo
         TenantInfo info =  modelMapper.map(tenant, TenantInfo.class);
+        info.setPlanType(tenant.getPlanType());
         UserEntity user = userService.getUserByIdAndTenantId(tenant.getOwnerId(), tenant.getId());
         info.setOwnerName(user.getUsername());
         return info;

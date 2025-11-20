@@ -20,7 +20,7 @@ public class FacturaPagoOrchestratorServiceImpl implements FacturaPagoOrchestrat
     private final PagoService pagoService;
 
     @Override
-    public PagoResponse registrarFacturaConPreferenciaPago(CrearFacturaYPreferenciaRequest request) {
+    public PagoResponse registrarFacturaConPreferenciaPago(CrearFacturaYPreferenciaRequest request, Integer months) {
         log.info("Orquestador: iniciar flujo crear factura + preferencia");
 
         if (request == null || request.getRequestFactura() == null) {
@@ -42,7 +42,7 @@ public class FacturaPagoOrchestratorServiceImpl implements FacturaPagoOrchestrat
 
         // 3) Delegar a PagoService para crear el pago / preferencia (se ejecuta vía proxy)
         try {
-            PagoResponse pagoResponse = pagoService.registrarPago(pagoReq);
+            PagoResponse pagoResponse = pagoService.registrarPago(pagoReq,months);
             log.info("Orquestador: pago registrado, id={}", pagoResponse.getId());
             return pagoResponse;
         } catch (Exception ex) {

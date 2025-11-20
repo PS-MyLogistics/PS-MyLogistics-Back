@@ -19,6 +19,7 @@ import com.mylogisticcba.payments.mercadoPago.repository.PagoRepository;
 import com.mylogisticcba.payments.mercadoPago.service.PagoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +37,13 @@ public class PagoServiceImpl implements PagoService {
     private final TenantService tenantService;
     private final FacturaServiceImpl facturaService;
 
+    // Precio por mes configurado en application.properties
+    @Value("${premium.price.perMonth:1000.00}")
+    private BigDecimal premiumPricePerMonth;
+
     @Override
     @Transactional
-    public PagoResponse registrarPago(RegistrarPagoRequest request) {
+    public PagoResponse registrarPago(RegistrarPagoRequest request,Integer months) {
         log.info("Iniciando registro de pago para factura ID: {}", request.getFacturaId());
 
         // 1. Validaciones
@@ -75,6 +80,7 @@ public class PagoServiceImpl implements PagoService {
         // 2. Crear pago en estado PENDIENTE
         Pago pago = new Pago();
         pago.setFactura(factura);
+        // inicialmente colocamos el monto de la factura; si se pasa 'months' lo sobreescribimos más abajo
         pago.setMonto(factura.getTotal().doubleValue());
         pago.setEstadoPago(EstadoPago.PENDIENTE);
         Pago pagoEnDB = pagoRepository.save(pago);
@@ -82,50 +88,77 @@ public class PagoServiceImpl implements PagoService {
         log.info("Pago ID: {} creado en estado PENDIENTE.", pagoEnDB.getId());
 
         try {
+            // Determine unit price: if months provided, use premiumPricePerMonth, else use invoice total
+            BigDecimal unitPrice =BigDecimal.valueOf(1000.00);
+            if (months != null && months > 0) {
+                unitPrice = premiumPricePerMonth;
+                // actualizar monto del pago al total calculado
+                BigDecimal total = unitPrice.multiply(BigDecimal.valueOf(months));
+                pagoEnDB.setMonto(total.doubleValue());
+                pagoRepository.save(pagoEnDB);
+            }
+
             // 3. Crear el ítem
             PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
                     .id("item-" + pagoEnDB.getId())
-                    .title("Subscripcion MyLogisticCBA por " + request.getMeses() + " meses")
-                    .description("Pago de Subscripcion mensual a MyLogisticCBA x"+ request.getMeses())
-                    .quantity(request.getMeses())
+                    .title("Subscripcion MyLogisticCBA por " + months + " meses")
+                    .description("Pago de Subscripcion mensual a MyLogisticCBA x"+ months)
+                    .quantity(months)
                     .currencyId("ARS")
-                    //agrega el precio unitario como 1 para que el total sea igual a la cantidad de meses
-                    .unitPrice(BigDecimal.valueOf(1.00))
+                    // usa el precio por mes configurado
+                    .unitPrice(unitPrice)
                     .build();
 
             List<PreferenceItemRequest> items = new ArrayList<>();
             items.add(itemRequest);
 
             // 4. Configurar URLs de retorno
+            /*
             PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
                     .success("http://localhost:8081/pagos/success?pagoId=" + pagoEnDB.getId())
                     .failure("http://localhost:8081/pagos/failure?pagoId=" + pagoEnDB.getId())
                     .pending("http://localhost:8081/pagos/pending?pagoId=" + pagoEnDB.getId())
                     .build();
-
+                */
             // 5. Crear la preferencia
             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                     .items(items)
-                    .backUrls(backUrls)
                     // No seteamos autoReturn aquí para evitar validación estricta del gateway
                     .externalReference(pagoEnDB.getId().toString()) // ⬅️ CRÍTICO para el webhook
                     // Para pruebas locales usar http y evitar problemas con certificados
-                    .notificationUrl("http://localhost:8081/api/webhooks/mercadopago")
+                   // .notificationUrl("http://localhost:8081/api/webhooks/mercadopago")
                     .build();
 
             PreferenceClient client = new PreferenceClient();
-            log.info("PreferenceRequest back_urls.success={}", backUrls != null ? "defined" : "null");
+          //  log.info("PreferenceRequest back_urls.success={}", backUrls != null ? "defined" : "null");
             log.info("PreferenceRequest external_reference={}", pagoEnDB.getId());
             Preference preference = client.create(preferenceRequest);
+
+
 
             // 6. Guardar el ID de la preferencia
             pagoEnDB.setIdPreference(preference.getId());
             pagoRepository.save(pagoEnDB);
 
-            log.info("✅ Preferencia creada en Mercado Pago");
-            log.info("   Preference ID: {}", preference.getId());
-            log.info("   Init Point: {}", preference.getInitPoint());
+            log.info("========== ✅ PREFERENCIA CREADA ==========");
+            log.info("✅ Preference ID: {}", preference.getId());
+            log.info("✅ Init Point: {}", preference.getInitPoint());
+            log.info("✅ Sandbox Init Point: {}", preference.getSandboxInitPoint());
+            log.info("===========================================");
 
+            // 9. LOG DE INSTRUCCIONES PARA TESTING
+            log.info("");
+            log.info("========== 📝 INSTRUCCIONES DE PRUEBA ==========");
+            log.info("1. Abre el Init Point en el navegador");
+            log.info("2. Usa un usuario de prueba del panel de MP");
+            log.info("3. Tarjeta de prueba:");
+            log.info("   - Número: 4509 9535 6623 3704");
+            log.info("   - CVV: 123");
+            log.info("   - Vencimiento: 11/25");
+            log.info("   - Nombre: APRO");
+            log.info("4. El monto a cobrar será: {} ARS", pagoEnDB.getMonto());
+            log.info("===============================================");
+            log.info("");
             // 7. Devolver respuesta
             return PagoResponse.builder()
                     .id(pagoEnDB.getId())

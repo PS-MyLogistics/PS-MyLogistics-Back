@@ -48,6 +48,9 @@ public class TenantEntity {
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    // Fecha en la que finaliza el periodo Premium del tenant (nullable)
+    private LocalDateTime endDatePremium;
+
     @PrePersist
     public void prePersist() {
         this.id = UUID.randomUUID();
