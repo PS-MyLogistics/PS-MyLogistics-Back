@@ -22,5 +22,8 @@ public class CrearFacturaRequest {
     @NotNull(message = "El ID del cliente no puede ser nulo")
     private UUID clienteId;
 
+    @NotNull(message = "El monto total no puede ser nulo")
+    @Min(value = 0, message = "El monto total debe ser mayor o igual a 0")
+    private Double total;
 
 }

@@ -27,17 +27,21 @@ public class FacturaPagoOrchestratorServiceImpl implements FacturaPagoOrchestrat
             throw new IllegalArgumentException("Request de factura es obligatorio");
         }
 
+        // Validar que existe el request de pago
+        if (request.getRequestPago() == null) {
+            throw new IllegalArgumentException("Request de pago es obligatorio");
+        }
+
+        // Asignar el monto del pago al request de factura (convertir BigDecimal a Double)
+        request.getRequestFactura().setTotal(request.getRequestPago().getMonto().doubleValue());
+        log.info("Orquestador: monto asignado a factura: {}", request.getRequestPago().getMonto());
+
         // 1) Crear factura
         FacturaResponse facturaResponse = facturaService.crearFactura(request.getRequestFactura());
         log.info("Orquestador: factura creada id={}", facturaResponse.getId());
 
         // 2) Preparar request de pago
         RegistrarPagoRequest pagoReq = request.getRequestPago();
-        if (pagoReq == null) {
-            // No hay request de pago: devolvemos respuesta vacía o lanzamos según política
-            throw new IllegalArgumentException("Request de pago es obligatorio");
-        }
-
         pagoReq.setFacturaId(facturaResponse.getId());
 
         // 3) Delegar a PagoService para crear el pago / preferencia (se ejecuta vía proxy)

@@ -7,7 +7,7 @@
 
 -- Insertar tenant
 INSERT INTO tenants (id, name, contact_email, contact_phone, owner_id, address, active, plan_type, status, max_users, created_at, updated_at)
-VALUES ('11111111-1111-1111-1111-111111111111', 'MiEmpresa2222', 'matiasbon2302@hotmail.com', '98765432312', '22222222-2222-2222-2222-222222222222', 'Avenida Siempre Viva 742', true, 'FREE', 'ACTIVE', 10, NOW(), NOW());
+VALUES ('11111111-1111-1111-1111-111111111111', 'MiEmpresa2222', 'matiasbon2302@hotmail.com', '98765432312', '22222222-2222-2222-2222-222222222222', 'Avenida Siempre Viva 742', true, 'PREMIUM', 'ACTIVE', 15, NOW(), NOW());
 
 -- Insertar usuario (password debe estar en formato BCrypt)
 INSERT INTO users (id, username, email, password, status, telephone, address, city, state_or_province, owner, tenant_id)

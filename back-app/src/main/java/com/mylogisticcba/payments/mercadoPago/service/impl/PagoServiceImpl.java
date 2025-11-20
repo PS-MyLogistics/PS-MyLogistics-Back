@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -81,7 +82,7 @@ public class PagoServiceImpl implements PagoService {
         Pago pago = new Pago();
         pago.setFactura(factura);
         // inicialmente colocamos el monto de la factura; si se pasa 'months' lo sobreescribimos más abajo
-        pago.setMonto(factura.getTotal().doubleValue());
+        pago.setMonto(factura.getTotal());
         pago.setEstadoPago(EstadoPago.PENDIENTE);
         Pago pagoEnDB = pagoRepository.save(pago);
 

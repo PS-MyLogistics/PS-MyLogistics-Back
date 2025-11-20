@@ -31,7 +31,8 @@ public class FacturaMapper {
 
         // Obligatorios (NOT NULL en la entidad)
         factura.setTenantId(request.getTenantId());
-        factura.setClienteId(request.getClienteId()); // FALTABA
+        factura.setClienteId(request.getClienteId());
+        factura.setTotal(request.getTotal());
        // factura.setMetodoPago(request.getMetodoPago());
 
         // Estado inicial por defecto

@@ -7,12 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
 public class TenantInfo {
 
-
+        private UUID id;
 
         private String name;
 

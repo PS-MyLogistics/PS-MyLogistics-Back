@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\Users\\danib\\Documents\\AaaaaFacu\\Trabajo final Integrador\\PS-MyLogistics-Back\\back-app\\src\\main\\java\\com\\mylogisticcba\\payments\\mercadoPago\\controller\\WebhookController.java\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
