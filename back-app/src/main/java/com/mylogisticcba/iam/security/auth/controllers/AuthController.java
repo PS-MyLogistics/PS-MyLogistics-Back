@@ -7,7 +7,6 @@ import com.mylogisticcba.iam.security.auth.dtos.response.EncodedMailResponse;
 import com.mylogisticcba.iam.security.auth.dtos.response.LoginResponse;
 import com.mylogisticcba.iam.security.auth.services.AuthService;
 import com.mylogisticcba.iam.security.auth.services.impls.ResetPasswordService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -49,14 +48,18 @@ public class AuthController {
     @PostMapping(value="register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterOwnerRequest req){
 
-        return ResponseEntity.ok(authService.registerTenantAndOwner(req));
+        log.info("REQUEST llego al register ENDPOINT");
+        // no loguear contraseñas u otros datos sensibles
+        ResponseEntity<AuthResponse> resp = ResponseEntity.ok(authService.registerTenantAndOwner(req));
+        log.info("RESPONSE register processed");
+        return resp;
     }
 
     //TODO redireccionar a login del frentend si o pagina estatica que diga que la cuenta fue verificada o el token es invalido
     //TODO crear endpoint para que el usuario pueda solicitar un nuevo email de verificacion
     @GetMapping(value="verifyRegisterTenantAndOwner")
     public ResponseEntity<AuthResponse> verifyRegister(@RequestParam String token,@RequestParam String idTenant ){
-        log.info("REQUEST llego al registration ENDPOINT");
+        log.info("REQUEST llego al verify ENDPOINT");
 
         return ResponseEntity.ok(authService.verifyRegistrationTenantAndOwner(token,idTenant));
     }
