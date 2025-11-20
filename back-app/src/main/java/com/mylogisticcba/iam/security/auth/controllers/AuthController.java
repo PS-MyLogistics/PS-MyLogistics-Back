@@ -55,6 +55,7 @@ public class AuthController {
     //TODO crear endpoint para que el usuario pueda solicitar un nuevo email de verificacion
     @GetMapping(value="verifyRegisterTenantAndOwner")
     public ResponseEntity<AuthResponse> verifyRegister(@RequestParam String token,@RequestParam String idTenant ){
+        log.info("REQUEST llego al registration ENDPOINT");
 
         return ResponseEntity.ok(authService.verifyRegistrationTenantAndOwner(token,idTenant));
     }
