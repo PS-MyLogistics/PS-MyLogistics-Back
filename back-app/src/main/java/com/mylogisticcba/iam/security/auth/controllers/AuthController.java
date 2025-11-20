@@ -30,7 +30,9 @@ public class AuthController {
     @PostMapping(value="login")
     public ResponseEntity<AuthResponse> login( @RequestBody LoginRequest req){
 
-            LoginResponse loginResponse = authService.login(req);
+        System.out.println("Login endpoint: recibí request para user = " + req.getUsername());
+
+        LoginResponse loginResponse = authService.login(req);
             ResponseCookie cookie = generateCookie(loginResponse);
             AuthResponse body = AuthResponse.builder()
                     .success(true)
