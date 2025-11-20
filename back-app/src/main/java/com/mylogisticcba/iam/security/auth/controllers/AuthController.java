@@ -23,6 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final ResetPasswordService resetPasswordService;
+    // Logger provisto por Lombok (@Slf4j)
     public AuthController(AuthService a, ResetPasswordService r) {
         authService= a;
         resetPasswordService = r;
