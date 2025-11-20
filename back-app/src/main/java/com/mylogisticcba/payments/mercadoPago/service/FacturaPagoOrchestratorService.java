@@ -4,6 +4,8 @@ import com.mylogisticcba.payments.mercadoPago.dto.CrearFacturaYPreferenciaReques
 import com.mylogisticcba.payments.mercadoPago.dto.PagoResponse;
 
 public interface FacturaPagoOrchestratorService {
-    PagoResponse registrarFacturaConPreferenciaPago(CrearFacturaYPreferenciaRequest request);
+    PagoResponse registrarFacturaConPreferenciaPago(CrearFacturaYPreferenciaRequest request,Integer meses);
+
+
 }
 

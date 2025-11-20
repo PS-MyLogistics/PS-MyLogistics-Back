@@ -24,12 +24,13 @@ public class RegistrarPagoRequest {
     //@NotNull(message = "El token de la tarjeta es obligatorio")
    // private String transaccionIdExterno; // Este es el token de MP
 
-    /**
+    /*
      * Método de pago: "visa", "master", "amex", etc.
      */
+            /*
     @NotNull(message = "El método de pago es obligatorio")
     private String metodoPago;
-
+*/
     /**
      * Email del pagador
      */

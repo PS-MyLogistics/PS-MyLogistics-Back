@@ -48,11 +48,11 @@ public class Factura implements Serializable {
 
     @Column(nullable = false)
     private Double total;
-
+/* si llegamos a implementar varios métodos de pago
     @Enumerated(EnumType.STRING) // Guarda el nombre del enum (ej: "TARJETA_CREDITO")
     @Column(nullable = false)
     private MetodoPago metodoPago;
-
+*/
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoFactura estado;

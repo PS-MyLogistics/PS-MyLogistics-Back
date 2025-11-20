@@ -10,6 +10,7 @@ import com.mylogisticcba.payments.mercadoPago.model.enums.EstadoFactura;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -31,8 +32,7 @@ public class FacturaMapper {
         // Obligatorios (NOT NULL en la entidad)
         factura.setTenantId(request.getTenantId());
         factura.setClienteId(request.getClienteId()); // FALTABA
-        factura.setTotal(request.getTotal());
-        factura.setMetodoPago(request.getMetodoPago());
+       // factura.setMetodoPago(request.getMetodoPago());
 
         // Estado inicial por defecto
         factura.setEstado(EstadoFactura.PENDIENTE);
@@ -56,8 +56,8 @@ public class FacturaMapper {
         response.setClientId(factura.getClienteId());
         response.setNumeroFactura(factura.getNumeroFactura());
         response.setFechaEmision(factura.getFechaEmision());
-        response.setTotal(factura.getTotal());
-        response.setMetodoPago(factura.getMetodoPago());
+        if(factura.getTotal()!=null){response.setTotal(factura.getTotal());}
+        //response.setMetodoPago(factura.getMetodoPago());
         response.setEstado(factura.getEstado());
 
         // Mapeamos también la lista de pagos asociados

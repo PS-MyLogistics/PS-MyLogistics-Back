@@ -44,11 +44,26 @@ public class PagoController {
      * POST /api/facturacion
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
-    @PostMapping("/facturaAndpreference")
+    @PostMapping("/facturaAndpreference/1Month")
     public ResponseEntity<PagoResponse> crearFacturaAndPreference(@Valid @RequestBody CrearFacturaYPreferenciaRequest request) {
         log.error("💥 ENTRÉ AL CONTROLLER /api/facturacion");
-        PagoResponse response = facturaPagoOrchestratorService.registrarFacturaConPreferenciaPago(request);
+        PagoResponse response = facturaPagoOrchestratorService.registrarFacturaConPreferenciaPago(request,1);
         return ResponseEntity.ok(response);
     }
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PostMapping("/facturaAndpreference/3Month")
+    public ResponseEntity<PagoResponse> crearFacturaAndPreference3(@Valid @RequestBody CrearFacturaYPreferenciaRequest request) {
+        log.error("💥 ENTRÉ AL CONTROLLER /api/facturacion");
+        PagoResponse response = facturaPagoOrchestratorService.registrarFacturaConPreferenciaPago(request,3);
+        return ResponseEntity.ok(response);
+    }
+    @PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
+    @PostMapping("/facturaAndpreference/6Month")
+    public ResponseEntity<PagoResponse> crearFacturaAndPreference6(@Valid @RequestBody CrearFacturaYPreferenciaRequest request) {
+        log.error("💥 ENTRÉ AL CONTROLLER /api/facturacion");
+        PagoResponse response = facturaPagoOrchestratorService.registrarFacturaConPreferenciaPago(request,6);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

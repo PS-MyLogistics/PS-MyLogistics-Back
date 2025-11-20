@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.UUID;
 
@@ -128,9 +130,8 @@ public class WebHookServiceMP {
                 facturaRepository.save(factura);
 
                 // Publicar evento solo si cambió el estado
-                if (estadoAnterior != EstadoPago.EXITOSO) {
-                    publicarEventoPagoExitoso(factura);
-                }
+                publicarEventoPagoExitoso(factura);
+
                 break;
 
             case "rejected":
@@ -210,9 +211,24 @@ public class WebHookServiceMP {
             event.setOwner(tenant.getOwnerId());
             event.setTenantId(tenant.getId());
 
-            publisher.publishEvent(event);
+            // Publicar AFTER COMMIT para que listeners vean datos ya persistidos
+            if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        try {
+                            publisher.publishEvent(event);
+                            log.info("📢 Evento PaymentCreditedEvent publicado (afterCommit)");
+                        } catch (Exception ex) {
+                            log.error("❌ Error publicando evento después del commit", ex);
+                        }
+                    }
+                });
+            } else {
+                publisher.publishEvent(event);
+                log.info("📢 Evento PaymentCreditedEvent publicado");
+            }
 
-            log.info("📢 Evento PaymentCreditedEvent publicado");
             log.info("   Cliente: {}", factura.getClienteId());
             log.info("   Factura: {}", factura.getId());
             log.info("   Tenant: {}", tenant.getId());
