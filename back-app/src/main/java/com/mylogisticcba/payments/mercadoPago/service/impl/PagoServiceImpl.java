@@ -81,7 +81,7 @@ public class PagoServiceImpl implements PagoService {
         Pago pago = new Pago();
         pago.setFactura(factura);
         // inicialmente colocamos el monto de la factura; si se pasa 'months' lo sobreescribimos más abajo
-        pago.setMonto(factura.getTotal().doubleValue());
+        pago.setMonto(Double.valueOf(1000.00));
         pago.setEstadoPago(EstadoPago.PENDIENTE);
         Pago pagoEnDB = pagoRepository.save(pago);
 

@@ -13,10 +13,11 @@ public class RegistrarPagoRequest {
 
     private UUID facturaId;
 
+    /*
     @NotNull(message = "El monto es obligatorio")
     @Positive(message = "El monto debe ser positivo")
     private BigDecimal monto;
-
+    */
     /**
      * Token de la tarjeta generado en el frontend usando Mercado Pago SDK
      * Documentación: https://www.mercadopago.com.ar/developers/es/docs/checkout-api/integration-configuration/card-payment-tokenization
@@ -45,6 +46,8 @@ public class RegistrarPagoRequest {
     private String dniPagador;
 
     //debe ser mayor a 0
+    /*
     @Positive(message = "Los meses deben ser mayores a 0")
     private int meses;
+    */
 }

@@ -46,7 +46,7 @@ public class Factura implements Serializable {
     @Column(nullable = false, updatable = false)
     private LocalDateTime fechaEmision;
 
-    @Column(nullable = false)
+    @Column()
     private Double total;
 /* si llegamos a implementar varios métodos de pago
     @Enumerated(EnumType.STRING) // Guarda el nombre del enum (ej: "TARJETA_CREDITO")
