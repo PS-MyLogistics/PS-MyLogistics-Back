@@ -1,3 +1,4 @@
+/*
 -- Archivo data.sql para carga automática al arrancar la app (H2 en memoria)
 -- Contiene tenant, usuario y producto de prueba
 
@@ -39,3 +40,4 @@ VALUES ('99999999-9999-9999-9999-999999999999', 'dealer1', 'dealer1@example.com'
 
 INSERT INTO user_roles (user_id, role)
 VALUES ('99999999-9999-9999-9999-999999999999', 'DEALER');
+*/

@@ -1,3 +1,4 @@
+/*
 -- Archivo de datos iniciales para insertar tenant, usuario y producto
 -- Reemplazar <BCRYPT_HASH_AQUI> por el hash generado con BCrypt para la contraseña: ContraSeña_Perro1
 -- Ejemplo para generar hash en Java:
@@ -25,3 +26,4 @@ VALUES ('33333333-3333-3333-3333-333333333333', '11111111-1111-1111-1111-1111111
 -- UPDATE users SET password = '<BCRYPT_HASH_AQUI>' WHERE id = '22222222-2222-2222-2222-222222222222';
 
 -- Fin
+*/

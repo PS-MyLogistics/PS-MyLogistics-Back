@@ -1,3 +1,4 @@
+/*
 -- Migration: Add vehicle relationship to users table
 -- Description: Allows dealers to have a vehicle assigned permanently
 -- Date: 2025-11-10
@@ -16,3 +17,5 @@ CREATE INDEX idx_users_vehicle_id ON users(vehicle_id);
 
 -- Comments for documentation
 COMMENT ON COLUMN users.vehicle_id IS 'ID of the vehicle assigned to this user (dealer)';
+ */
+
