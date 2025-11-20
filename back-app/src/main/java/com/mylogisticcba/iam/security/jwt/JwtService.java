@@ -29,7 +29,7 @@ public class JwtService {
 
     private String getToken(Map<String,Object> extraClaims, UserDetails user) {
         if (user instanceof CustomUserDetails) {
-            extraClaims.put("tenantID", ((CustomUserDetails) user).getTenantId().toString());
+            extraClaims.put("tenantID",  Objects.toString (((CustomUserDetails) user).getTenantId().toString()));
             extraClaims.put("globalTokenVersion",Objects.toString (((CustomUserDetails) user).getGlobalTokenVersion(),null));
             extraClaims.put("sessionId", Objects.toString(((CustomUserDetails) user).getSessionId(),null));
 
