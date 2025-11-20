@@ -9,6 +9,7 @@ import com.mylogisticcba.iam.security.auth.services.AuthService;
 import com.mylogisticcba.iam.security.auth.services.impls.ResetPasswordService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-
+@Slf4j
 public class AuthController {
 
 
@@ -30,7 +31,7 @@ public class AuthController {
     @PostMapping(value="login")
     public ResponseEntity<AuthResponse> login( @RequestBody LoginRequest req){
 
-        System.out.println("Login endpoint: recibí request para user = " + req.getUsername());
+        log.info("REQUEST llego al login ENDPOINT");
 
         LoginResponse loginResponse = authService.login(req);
             ResponseCookie cookie = generateCookie(loginResponse);

@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter  extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("request llego al doFilterInternal" );
+        log.info("REQUEST  llego al doFilterInternal" );
 
         TenantContextHolder.clear();
 
