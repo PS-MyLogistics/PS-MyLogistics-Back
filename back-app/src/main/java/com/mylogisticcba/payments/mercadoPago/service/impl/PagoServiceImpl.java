@@ -41,6 +41,8 @@ public class PagoServiceImpl implements PagoService {
     @Value("${premium.price.perMonth:1000.00}")
     private BigDecimal premiumPricePerMonth;
 
+    // Base URL pública de la aplicación (usada para back URLs y notificationUrl)
+
     @Override
     @Transactional
     public PagoResponse registrarPago(RegistrarPagoRequest request,Integer months) {
@@ -114,20 +116,21 @@ public class PagoServiceImpl implements PagoService {
 
             // 4. Configurar URLs de retorno
             /*
-            PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                    .success("http://localhost:8081/pagos/success?pagoId=" + pagoEnDB.getId())
-                    .failure("http://localhost:8081/pagos/failure?pagoId=" + pagoEnDB.getId())
-                    .pending("http://localhost:8081/pagos/pending?pagoId=" + pagoEnDB.getId())
+               PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
+                    .success(appUrl + "/pagos/success?pagoId=" + pagoEnDB.getId())
+                    .failure(appUrl + "/pagos/failure?pagoId=" + pagoEnDB.getId())
+                    .pending(appUrl + "/pagos/pending?pagoId=" + pagoEnDB.getId())
                     .build();
-                */
-            // 5. Crear la preferencia
-            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
-                    .items(items)
-                    // No seteamos autoReturn aquí para evitar validación estricta del gateway
-                    .externalReference(pagoEnDB.getId().toString()) // ⬅️ CRÍTICO para el webhook
-                    // Para pruebas locales usar http y evitar problemas con certificados
-                   // .notificationUrl("http://localhost:8081/api/webhooks/mercadopago")
-                    .build();
+              */
+             // 5. Crear la preferencia
+             PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+                     .items(items)
+                     // No seteamos autoReturn aquí para evitar validación estricta del gateway
+                     .externalReference(pagoEnDB.getId().toString()) // ⬅️ CRÍTICO para el webhook
+                     // Definimos back URLs y la notificationUrl (webhook) para que MercadoPago notifique cambios
+                     //
+                     .notificationUrl("internal-trudi-my-logistic-cba-back-01021729.koyeb.app" + "/api/webhooks/mercadopago")
+                     .build();
 
             PreferenceClient client = new PreferenceClient();
           //  log.info("PreferenceRequest back_urls.success={}", backUrls != null ? "defined" : "null");
