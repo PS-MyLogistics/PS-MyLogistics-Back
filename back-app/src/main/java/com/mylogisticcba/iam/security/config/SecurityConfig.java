@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -69,6 +70,9 @@ public class SecurityConfig {
                                         "/swagger-resources/**",
                                         "/webjars/**"
                                       ).permitAll() // H2, Auth y Swagger libres
+                                // Permitir webhooks externos (MercadoPago) sin autenticación
+                                .requestMatchers(HttpMethod.POST, "/api/webhooks/**").permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/api/webhooks/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->

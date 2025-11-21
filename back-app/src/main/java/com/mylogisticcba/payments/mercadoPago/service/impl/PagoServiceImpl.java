@@ -149,19 +149,6 @@ public class PagoServiceImpl implements PagoService {
             log.info("✅ Sandbox Init Point: {}", preference.getSandboxInitPoint());
             log.info("===========================================");
 
-            // 9. LOG DE INSTRUCCIONES PARA TESTING
-            log.info("");
-            log.info("========== 📝 INSTRUCCIONES DE PRUEBA ==========");
-            log.info("1. Abre el Init Point en el navegador");
-            log.info("2. Usa un usuario de prueba del panel de MP");
-            log.info("3. Tarjeta de prueba:");
-            log.info("   - Número: 4509 9535 6623 3704");
-            log.info("   - CVV: 123");
-            log.info("   - Vencimiento: 11/25");
-            log.info("   - Nombre: APRO");
-            log.info("4. El monto a cobrar será: {} ARS", pagoEnDB.getMonto());
-            log.info("===============================================");
-            log.info("");
             // 7. Devolver respuesta
             return PagoResponse.builder()
                     .id(pagoEnDB.getId())
