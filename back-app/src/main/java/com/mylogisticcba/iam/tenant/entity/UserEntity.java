@@ -65,7 +65,10 @@ public class UserEntity {
 
     @PrePersist
     public void prePersist() {
-        this.id = UUID.randomUUID(); // Genera un UUID automaticamente antes de persistir
+        this.id = UUID.randomUUID();
+        if (this.globalTokenVersion == null) {
+            this.globalTokenVersion = UUID.randomUUID();
+        }// Genera un UUID automaticamente antes de persistir
     }
 
 
