@@ -29,8 +29,10 @@ public class AuthController {
     }
 
     @PostMapping(value="login")
-    public ResponseEntity<AuthResponse> login( @RequestBody LoginRequest req){
+    public ResponseEntity<String> login( @RequestBody LoginRequest req){
 
+
+        return ResponseEntity.ok("ok false response");
         log.info("REQUEST llego al login ENDPOINT");
 
         LoginResponse loginResponse = authService.login(req);
