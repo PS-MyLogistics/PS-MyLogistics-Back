@@ -129,7 +129,7 @@ public class PagoServiceImpl implements PagoService {
                      .externalReference(pagoEnDB.getId().toString()) // ⬅️ CRÍTICO para el webhook
                      // Definimos back URLs y la notificationUrl (webhook) para que MercadoPago notifique cambios
                      //
-                     .notificationUrl("internal-trudi-my-logistic-cba-back-01021729.koyeb.app" + "/api/webhooks/mercadopago")
+                     .notificationUrl("https://internal-trudi-my-logistic-cba-back-01021729.koyeb.app/api/webhooks/mercadopago")
                      .build();
 
             PreferenceClient client = new PreferenceClient();
