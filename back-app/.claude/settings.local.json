@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(\"C:\\Users\\danib\\Documents\\AaaaaFacu\\Trabajo final Integrador\\PS-MyLogistics-Back\\back-app\\src\\main\\java\\com\\mylogisticcba\\payments\\mercadoPago\\controller\\WebhookController.java\")",
-      "WebFetch(domain:nominatim.openstreetmap.org)"
+      "WebFetch(domain:nominatim.openstreetmap.org)",
+      "Bash(java:*)",
+      "Bash(mvn exec:java:*)",
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout /t 30 /nobreak)",
+      "Bash(curl:*)",
+      "WebFetch(domain:bcrypt-generator.com)",
+      "Bash(netstat:*)",
+      "Bash(cat:*)",
+      "Bash(mvn clean compile:*)"
     ],
     "deny": [],
     "ask": []

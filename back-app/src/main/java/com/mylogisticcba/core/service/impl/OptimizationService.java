@@ -135,11 +135,17 @@ public class OptimizationService {
 
         Map<String, String> headers = Map.of("Authorization", ORS_API_KEY, "Content-Type", "application/json");
 
-        String resp = restClientService.postWithHeaders(ORS_OPTIMIZATION_URL, body, headers, String.class);
-        JsonNode root = objectMapper.readTree(resp);
-
-        log.info("Received response from ORS API");
-        log.debug("Response body: {}", resp);
+        String resp;
+        JsonNode root;
+        try {
+            resp = restClientService.postWithHeaders(ORS_OPTIMIZATION_URL, body, headers, String.class);
+            root = objectMapper.readTree(resp);
+            log.info("Received response from ORS API");
+            log.debug("Response body: {}", resp);
+        } catch (Exception e) {
+            log.error("Error calling ORS API: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al llamar al servicio de optimización de rutas: " + e.getMessage(), e);
+        }
 
         // Extraer orden optimizada: buscar routes -> steps -> tipo job
         List<Integer> optimizedJobOrder = new ArrayList<>();

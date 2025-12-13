@@ -74,6 +74,11 @@ public class RestClientService {
                     .bodyToMono(responseType)
                     .block();
         } catch (WebClientResponseException e) {
+            String errorBody = e.getResponseBodyAsString();
+            throw new RuntimeException(
+                String.format("Error en llamada POST a: %s | Status: %d | Response: %s",
+                    url, e.getStatusCode().value(), errorBody), e);
+        } catch (Exception e) {
             throw new RuntimeException("Error en llamada POST a: " + url + " -> " + e.getMessage(), e);
         }
     }

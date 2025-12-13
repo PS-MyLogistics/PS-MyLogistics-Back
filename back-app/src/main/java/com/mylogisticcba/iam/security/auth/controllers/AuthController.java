@@ -48,26 +48,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.registerTenantAndOwner(req));
     }
 
-    //TODO redireccionar a login del frentend si o pagina estatica que diga que la cuenta fue verificada o el token es invalido
-    //TODO crear endpoint para que el usuario pueda solicitar un nuevo email de verificacion
-    @GetMapping(value="verifyRegisterTenantAndOwner")
-    public ResponseEntity<AuthResponse> verifyRegister(@RequestParam String token,@RequestParam String idTenant ){
-
-        return ResponseEntity.ok(authService.verifyRegistrationTenantAndOwner(token,idTenant));
-    }
-
-    //TODO redireccionar a login del frontend
-    @GetMapping(value="verifyRegisterUserInTenant")
-    public ResponseEntity<AuthResponse> verifyRegister2(@RequestParam String token,@RequestParam String idTenant ){
-
-        return ResponseEntity.ok(authService.verifyRegistrationInTenant(token,idTenant));
-    }
-    //TODO redireccionar a login del frontend
-    @GetMapping(value="unfreeze")
-    public ResponseEntity<AuthResponse> verifyAfterFreeze(@RequestParam String token,@RequestParam String tenantName,@RequestParam String username ){
-
-        return ResponseEntity.ok(authService.verifyAfterFreeze(token,tenantName,username));
-    }
 
 
     @PostMapping("/refresh-token")

@@ -13,10 +13,10 @@ INSERT INTO user_roles (user_id, role)
 VALUES ('22222222-2222-2222-2222-222222222222', 'OWNER');
 
 -- Zonas de distribución
-INSERT INTO zones (id, tenant_id, name, description, is_active, created_at, updated_at)
+INSERT INTO zones (id, tenant_id, name, description, color, is_active, created_at, updated_at)
 VALUES
-('a0000001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Zona Norte', 'Zona Norte de Córdoba', true, NOW(), NOW()),
-('a0000002-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'Zona Sur', 'Zona Sur de Córdoba', true, NOW(), NOW());
+('a0000001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'Zona Norte', 'Zona Norte de Córdoba', '#0000FF', true, NOW(), NOW()),
+('a0000002-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'Zona Sur', 'Zona Sur de Córdoba', '#FF0000', true, NOW(), NOW());
 
 -- Productos de bebidas
 INSERT INTO product (id, tenant_id, name, sku, description, price, status, category, image_url, is_available, created_at, updated_at)
@@ -92,13 +92,13 @@ VALUES
 ('e0000001-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', 'DEF-456', 'Mercedes Sprinter', 150, NOW(), NOW()),
 ('e0000002-0000-0000-0000-000000000002', '11111111-1111-1111-1111-111111111111', 'GHI-789', 'Renault Master', 120, NOW(), NOW());
 
--- Usuarios dealers (password: ContraSeña_Perro1 para dealer1 y dealer2, Dani123! para dan)
--- Hash BCrypt para "Dani123!": $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+-- Usuarios dealers (password: ContraSeña_Perro1 para todos los dealers)
+-- Hash BCrypt para "ContraSeña_Perro1": $2a$10$bdnEVjEWdjC1XOmm2qzUm.rc61SE8WYLA9YznjnVaku6AjbVGDHh.
 INSERT INTO users (id, username, email, password, status, telephone, address, city, state_or_province, owner, tenant_id)
 VALUES
 ('99999999-9999-9999-9999-999999999999', 'dealer1', 'dealer1@example.com', '$2a$10$bdnEVjEWdjC1XOmm2qzUm.rc61SE8WYLA9YznjnVaku6AjbVGDHh.', 'ACTIVE', '3513336666', 'Av. Colón 1234', 'Córdoba', 'Córdoba', false, '11111111-1111-1111-1111-111111111111'),
 ('d0000001-0000-0000-0000-000000000001', 'dealer2', 'dealer2@example.com', '$2a$10$bdnEVjEWdjC1XOmm2qzUm.rc61SE8WYLA9YznjnVaku6AjbVGDHh.', 'ACTIVE', '3517778888', 'Av. Vélez Sarsfield 567', 'Córdoba', 'Córdoba', false, '11111111-1111-1111-1111-111111111111'),
-('d0000002-0000-0000-0000-000000000002', 'dan', 'danibogdan_17@hotmail.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ACTIVE', '3512371898', 'Barrio Alto Verde', 'Córdoba', 'Córdoba', false, '11111111-1111-1111-1111-111111111111');
+('d0000002-0000-0000-0000-000000000002', 'dan', 'danibogdan_17@hotmail.com', '$2a$10$bdnEVjEWdjC1XOmm2qzUm.rc61SE8WYLA9YznjnVaku6AjbVGDHh.', 'ACTIVE', '3512371898', 'Barrio Alto Verde', 'Córdoba', 'Córdoba', false, '11111111-1111-1111-1111-111111111111');
 
 INSERT INTO user_roles (user_id, role)
 VALUES

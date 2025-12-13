@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error de Verificación - MyLogistic CBA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            animation: scaleIn 0.5s ease-out 0.2s both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .icon svg {
+            width: 50px;
+            height: 50px;
+            stroke: white;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 16px;
+            color: #718096;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            border-left: 4px solid #f5576c;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .error-message strong {
+            color: #f5576c;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .suggestions {
+            background: #f0f4ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .suggestions h3 {
+            font-size: 16px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            padding: 8px 0;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .suggestions li:before {
+            content: "→ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">
+            <svg viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="22"/>
+                <line x1="26" y1="18" x2="26" y2="30"/>
+                <line x1="26" y1="36" x2="26" y2="38"/>
+            </svg>
+        </div>
+
+        <h1>⚠️ Error de Verificación</h1>
+
+        <p>No pudimos verificar tu cuenta. Por favor, revisa la información a continuación.</p>
+
+        <div class="error-message">
+            <strong>Mensaje de error:</strong>
+            <span th:text="${errorMessage}">El token de verificación es inválido o ha expirado</span>
+        </div>
+
+        <div class="suggestions">
+            <h3>💡 Posibles soluciones:</h3>
+            <ul>
+                <li>El enlace de verificación puede haber expirado</li>
+                <li>Ya verificaste tu cuenta anteriormente</li>
+                <li>El enlace fue copiado incorrectamente</li>
+                <li>Solicita un nuevo email de verificación</li>
+            </ul>
+        </div>
+
+        <a th:href="${loginUrl}" href="http://localhost:4200/login" class="btn">
+            Ir al Login
+        </a>
+
+        <div class="footer">
+            © 2025 MyLogistic CBA | Sistema de Logística<br>
+            <span style="color: #718096; font-size: 11px;">
+                Si necesitas ayuda, contacta a soporte en mylogisticcba@outlook.com
+            </span>
+        </div>
+    </div>
+</body>
+</html>
